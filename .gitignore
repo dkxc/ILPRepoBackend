@@ -29,7 +29,6 @@ desktop.ini
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?
 
 # Ignore other package managers
