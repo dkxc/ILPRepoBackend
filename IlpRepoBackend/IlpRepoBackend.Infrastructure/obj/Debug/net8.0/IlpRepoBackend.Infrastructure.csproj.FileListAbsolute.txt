@@ -1,0 +1,16 @@
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\obj\Debug\net8.0\IlpRepoBackend.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\obj\Debug\net8.0\IlpRepoBackend.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\obj\Debug\net8.0\IlpRepoBackend.Infrastructure.AssemblyInfo.cs
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\obj\Debug\net8.0\IlpRepoBackend.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\obj\Debug\net8.0\IlpRepoBackend.Infrastructure.sourcelink.json
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\bin\Debug\net8.0\IlpRepoBackend.Infrastructure.deps.json
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\bin\Debug\net8.0\IlpRepoBackend.Infrastructure.dll
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\bin\Debug\net8.0\IlpRepoBackend.Infrastructure.pdb
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\bin\Debug\net8.0\IlpRepoBackend.Domain.dll
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\bin\Debug\net8.0\IlpRepoBackend.Domain.pdb
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\obj\Debug\net8.0\IlpRepoBackend.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\obj\Debug\net8.0\IlpRepoB.875C28F8.Up2Date
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\obj\Debug\net8.0\IlpRepoBackend.Infrastructure.dll
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\obj\Debug\net8.0\refint\IlpRepoBackend.Infrastructure.dll
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\obj\Debug\net8.0\IlpRepoBackend.Infrastructure.pdb
+C:\Users\mohammed.aiman\Desktop\ILP_REPO_BACKEND\IlpRepoBackend\IlpRepoBackend.Infrastructure\obj\Debug\net8.0\ref\IlpRepoBackend.Infrastructure.dll
