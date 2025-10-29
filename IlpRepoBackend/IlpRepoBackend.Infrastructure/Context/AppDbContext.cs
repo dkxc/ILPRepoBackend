@@ -51,13 +51,14 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.ToTable("users");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+                entity.Property(e => e.Email).HasColumnName("email").IsRequired().HasMaxLength(50);
                 entity.Property(e => e.Username).HasColumnName("username").IsRequired().HasMaxLength(50);
                 entity.Property(e => e.PasswordHash).HasColumnName("password_hash").IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Role).HasColumnName("role").HasConversion<string>().IsRequired();
-                entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true); // NEW
+                entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
-                entity.HasIndex(e => e.Username).IsUnique();
+                entity.HasIndex(e => e.Email).IsUnique();
             });
 
             // Batch Configuration
@@ -132,11 +133,12 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
                 entity.Property(e => e.Name).HasColumnName("name").HasMaxLength(255);
+                entity.Property(e => e.Email).HasColumnName("email").IsRequired().HasMaxLength(50);
                 entity.Property(e => e.ProjectId).HasColumnName("project_id");
                 entity.Property(e => e.MentorType).HasColumnName("mentor_type").HasConversion<string>().IsRequired(); // NEW
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
-
+                entity.HasIndex(e => e.Email).IsUnique();
                 entity.HasOne(e => e.Project)
                     .WithMany(p => p.Mentors)
                     .HasForeignKey(e => e.ProjectId)
@@ -150,10 +152,11 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
                 entity.Property(e => e.Name).HasColumnName("name").HasMaxLength(255);
+                entity.Property(e => e.Email).HasColumnName("email").IsRequired().HasMaxLength(50);
                 entity.Property(e => e.ProjectId).HasColumnName("project_id");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
-
+                entity.HasIndex(e => e.Email).IsUnique();
                 entity.HasOne(e => e.Project)
                     .WithMany(p => p.Pocs)
                     .HasForeignKey(e => e.ProjectId)
