@@ -11,6 +11,7 @@ namespace IlpRepoBackend.Domain.Entities
     {
         public int Id { get; set; }
         public string? Name { get; set; }
+        public string? Email { get; set; }
         public int? ProjectId { get; set; }
         public MentorType MentorType { get; set; } // NEW PROPERTY
         public DateTime CreatedAt { get; set; }
