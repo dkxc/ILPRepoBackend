@@ -227,8 +227,7 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
                 entity.Property(e => e.Name).HasColumnName("name").IsRequired().HasMaxLength(100);
-                entity.Property(e => e.Type).HasColumnName("type").HasMaxLength(50);
-                entity.Property(e => e.TemplateLink).HasColumnName("template_link").HasMaxLength(500);
+                entity.Property(e => e.Link).HasColumnName("link").HasMaxLength(255);
                 entity.Property(e => e.UploadDate).HasColumnName("upload_date").HasDefaultValueSql("now()");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
@@ -244,7 +243,6 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.Property(e => e.DocumentId).HasColumnName("document_id");
                 entity.Property(e => e.RequestDate).HasColumnName("request_date").HasDefaultValueSql("now()");
                 entity.Property(e => e.DueDate).HasColumnName("due_date").IsRequired();
-                entity.Property(e => e.FileUrl).HasColumnName("file_url").HasMaxLength(500);
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
 
@@ -267,11 +265,7 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
                 entity.Property(e => e.DocumentId).HasColumnName("document_id");
                 entity.Property(e => e.RequestId).HasColumnName("request_id");
-                entity.Property(e => e.ProjectId).HasColumnName("project_id");
-                entity.Property(e => e.TraineeId).HasColumnName("trainee_id");
-                entity.Property(e => e.SubmissionLink).HasColumnName("submission_link").HasMaxLength(500);
-                entity.Property(e => e.FileName).HasColumnName("file_name").HasMaxLength(255);
-                entity.Property(e => e.FileType).HasColumnName("file_type").HasMaxLength(50);
+                entity.Property(e => e.SubmissionLink).HasColumnName("submission_link").HasMaxLength(500); // NEW
                 entity.Property(e => e.SubmissionDate).HasColumnName("submission_date").HasDefaultValueSql("now()");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
@@ -284,16 +278,6 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.HasOne(e => e.DocumentRequest)
                     .WithMany(dr => dr.DocumentSubmissions)
                     .HasForeignKey(e => e.RequestId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                entity.HasOne(e => e.Project)
-                    .WithMany()
-                    .HasForeignKey(e => e.ProjectId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                entity.HasOne(e => e.Trainee)
-                    .WithMany()
-                    .HasForeignKey(e => e.TraineeId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
 
