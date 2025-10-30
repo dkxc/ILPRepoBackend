@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 ﻿using IlpRepoBackend.Domain.Enum;
 using System;
 using System.Collections.Generic;
@@ -7,18 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
->>>>>>> b1a77052b2965f66ef4845525863870bf757b159
 namespace IlpRepoBackend.Application.Dto
 {
     public class TraineeDto
     {
         public int Id { get; set; }
-<<<<<<< HEAD
-        public string Username { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string? PhoneNo { get; set; }
-        public string Role { get; set; } = string.Empty;
-=======
         public int UserId { get; set; }
         public string Username { get; set; } = string.Empty;
         public int BatchId { get; set; }
@@ -36,6 +27,5 @@ namespace IlpRepoBackend.Application.Dto
         public string? EmergencyContactNo { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
->>>>>>> b1a77052b2965f66ef4845525863870bf757b159
     }
 }

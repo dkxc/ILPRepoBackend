@@ -1,14 +1,7 @@
-<<<<<<< HEAD
-using IlpRepoBackend.Application;
-using IlpRepoBackend.Infrastructure;
-using IlpRepoBackend.Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
-=======
 using IlpRepoBackend.Api.Middleware;
 using IlpRepoBackend.Application;
 using IlpRepoBackend.Infrastructure;
 using Microsoft.OpenApi.Models;
->>>>>>> b1a77052b2965f66ef4845525863870bf757b159
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
@@ -23,17 +16,6 @@ builder.Services.AddCors(options =>
 });
 // Add services to the container
 builder.Services.AddControllers();
-<<<<<<< HEAD
-
-// Register Application Services (MediatR, AutoMapper)
-builder.Services.AddApplicationServices();
-
-// Register Persistence Services (Repositories and DbContext)
-builder.Services.AddPersistenceServices(builder.Configuration);
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-=======
->>>>>>> b1a77052b2965f66ef4845525863870bf757b159
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -51,14 +33,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-<<<<<<< HEAD
-// Enable serving static files (for uploaded documents)
-app.UseStaticFiles();
-
-=======
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseCors("AllowFrontend");
->>>>>>> b1a77052b2965f66ef4845525863870bf757b159
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

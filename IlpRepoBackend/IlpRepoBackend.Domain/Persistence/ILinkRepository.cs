@@ -9,6 +9,5 @@ namespace IlpRepoBackend.Domain.Persistence
 {
     public interface ILinkRepository : IGenericRepository<Link>
     {
-        Task<IEnumerable<Link>> GetAllLinkTypesAsync();
     }
 }
