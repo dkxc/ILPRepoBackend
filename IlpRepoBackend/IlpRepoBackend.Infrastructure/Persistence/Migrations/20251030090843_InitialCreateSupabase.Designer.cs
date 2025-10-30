@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251029091646_InitialCreate1")]
-    partial class InitialCreate1
+    [Migration("20251030090843_InitialCreateSupabase")]
+    partial class InitialCreateSupabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -251,6 +251,14 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.Property<int?>("DocumentId")
                         .HasColumnType("integer")
                         .HasColumnName("document_id");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("text")
+                        .HasColumnName("file_name");
+
+                    b.Property<string>("FileType")
+                        .HasColumnType("text")
+                        .HasColumnName("file_type");
 
                     b.Property<int?>("RequestId")
                         .HasColumnType("integer")
@@ -497,6 +505,37 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.ToTable("links", (string)null);
                 });
 
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.MenterForAProject", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MenterId")
+                        .HasColumnType("integer")
+                        .HasColumnName("mentor_id");
+
+                    b.Property<string>("MentorType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mentor_type");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer")
+                        .HasColumnName("project_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MenterId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("menter_for_project", (string)null);
+                });
+
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Mentor", b =>
                 {
                     b.Property<int>("Id")
@@ -528,10 +567,6 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
-                    b.Property<int?>("ProjectId")
-                        .HasColumnType("integer")
-                        .HasColumnName("project_id");
-
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -542,8 +577,6 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
-
-                    b.HasIndex("ProjectId");
 
                     b.ToTable("mentors", (string)null);
                 });
@@ -615,10 +648,6 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
-                    b.Property<int?>("ProjectId")
-                        .HasColumnType("integer")
-                        .HasColumnName("project_id");
-
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -630,9 +659,33 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
+                    b.ToTable("pocs", (string)null);
+                });
+
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.PocsForProject", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("PocId")
+                        .HasColumnType("integer")
+                        .HasColumnName("poc_id");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer")
+                        .HasColumnName("project_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PocId");
+
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("pocs", (string)null);
+                    b.ToTable("pocs_for_project", (string)null);
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Project", b =>
@@ -728,13 +781,12 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.ProjectTeam", b =>
                 {
-                    b.Property<int>("ProjectId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("project_id");
+                        .HasColumnName("id");
 
-                    b.Property<int>("TraineeId")
-                        .HasColumnType("integer")
-                        .HasColumnName("trainee_id");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -742,10 +794,18 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer")
+                        .HasColumnName("project_id");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("role");
+
+                    b.Property<int>("TraineeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("trainee_id");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -753,9 +813,12 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
-                    b.HasKey("ProjectId", "TraineeId");
+                    b.HasKey("Id");
 
                     b.HasIndex("TraineeId");
+
+                    b.HasIndex("ProjectId", "TraineeId")
+                        .IsUnique();
 
                     b.ToTable("project_team", (string)null);
                 });
@@ -1179,12 +1242,21 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.Navigation("FeedbackHeader");
                 });
 
-            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Mentor", b =>
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.MenterForAProject", b =>
                 {
+                    b.HasOne("IlpRepoBackend.Domain.Entities.Mentor", "Mentor")
+                        .WithMany("MenterForProjects")
+                        .HasForeignKey("MenterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("IlpRepoBackend.Domain.Entities.Project", "Project")
-                        .WithMany("Mentors")
+                        .WithMany("MentersForProjects")
                         .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Mentor");
 
                     b.Navigation("Project");
                 });
@@ -1199,12 +1271,21 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.Navigation("DocumentRequest");
                 });
 
-            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Poc", b =>
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.PocsForProject", b =>
                 {
+                    b.HasOne("IlpRepoBackend.Domain.Entities.Poc", "Poc")
+                        .WithMany("PocsForProjects")
+                        .HasForeignKey("PocId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("IlpRepoBackend.Domain.Entities.Project", "Project")
-                        .WithMany("Pocs")
+                        .WithMany("PocsForProjects")
                         .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Poc");
 
                     b.Navigation("Project");
                 });
@@ -1371,13 +1452,23 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.Navigation("ProjectLinks");
                 });
 
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Mentor", b =>
+                {
+                    b.Navigation("MenterForProjects");
+                });
+
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Poc", b =>
+                {
+                    b.Navigation("PocsForProjects");
+                });
+
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Project", b =>
                 {
                     b.Navigation("DocumentRequests");
 
-                    b.Navigation("Mentors");
+                    b.Navigation("MentersForProjects");
 
-                    b.Navigation("Pocs");
+                    b.Navigation("PocsForProjects");
 
                     b.Navigation("ProjectLinks");
 

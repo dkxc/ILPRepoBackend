@@ -1,4 +1,5 @@
-﻿using IlpRepoBackend.Domain.Persistence;
+﻿using IlpRepoBackend.Domain.Entities;
+using IlpRepoBackend.Domain.Persistence;
 using IlpRepoBackend.Infrastructure.Context;
 using IlpRepoBackend.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -22,8 +23,12 @@ namespace IlpRepoBackend.Infrastructure
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IBatchRepository, BatchRepository>();
             services.AddScoped<ITraineeRepository, TraineeRepository>();
-            //services.AddScoped<IProjectRepository, ProjectRepository>();
-            //services.AddScoped<IProjectTeamRepository, ProjectTeamRepository>();
+            services.AddScoped<IProjectRepository, ProjectRepository>();
+            services.AddScoped<IProjecTeamRepository, ProjecTeamRepository>();
+            services.AddScoped<IPocForAProjectRepository, PocForAProjectRepository>();
+            services.AddScoped<IMentorRepository, MenterRepository>();
+            services.AddScoped<IMentorForPRojectRepository, MentorForPRojectRepository>();
+            services.AddScoped<IPocRepository, PocRepository>();
 
             return services;
         }

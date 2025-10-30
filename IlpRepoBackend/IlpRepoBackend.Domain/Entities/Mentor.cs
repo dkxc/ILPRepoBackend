@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace IlpRepoBackend.Domain.Entities
@@ -12,11 +13,19 @@ namespace IlpRepoBackend.Domain.Entities
         public int Id { get; set; }
         public string? Name { get; set; }
         public string? Email { get; set; }
-        public int? ProjectId { get; set; }
-        public MentorType MentorType { get; set; } // NEW PROPERTY
+        //public int? ProjectId { get; set; }
+        public MentorType MentorType { get; set; } 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        public Project? Project { get; set; }
+        //public Project? Project { get; set; }
+
+        [JsonIgnore]
+        public ICollection<MenterForAProject> MenterForProjects { get; set; } = new List<MenterForAProject>();
+
+        //public static implicit operator Mentor(void v)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

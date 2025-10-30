@@ -1,8 +1,5 @@
 ﻿using IlpRepoBackend.Application.Command.Projects;
-using IlpRepoBackend.Application.Command.Users;
-using IlpRepoBackend.Application.CustomeException;
 using IlpRepoBackend.Application.Wrapper;
-using IlpRepoBackend.Domain.Entities;
 using IlpRepoBackend.Domain.Persistence;
 using MediatR;
 using System;
@@ -11,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IlpRepoBackend.Application.Handler.Users
+namespace IlpRepoBackend.Application.Handler.Projects
 {
     public class DeleteProjectHandler : IRequestHandler<DeleteProjectCommand, ApiResponse<bool>>
     {

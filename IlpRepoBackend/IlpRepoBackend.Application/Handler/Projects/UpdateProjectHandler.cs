@@ -12,7 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace IlpRepoBackend.Application.Handler.Users
+namespace IlpRepoBackend.Application.Handler.Projects
 {
     public class UpdateProjectHandler : IRequestHandler<UpdateProjectCommand, ApiResponse<ProjectDto>>
     {
@@ -89,7 +89,7 @@ namespace IlpRepoBackend.Application.Handler.Users
 
                 foreach (var member in traineesToRemove)
                 {
-                    await _projecTeamRepository.DeleteByProjectIdAndTraineeIdAsync(member.ProjectId, member.TraineeId);
+                    await _projecTeamRepository.DeleteAsync(member.Id);
                 }
 
                 // Add new team members
@@ -132,7 +132,7 @@ namespace IlpRepoBackend.Application.Handler.Users
                 var existingLead = existingTeamMembers.FirstOrDefault(pt => pt.Role == ProjectRole.TeamLead);
                 if (existingLead != null)
                 {
-                    await _projecTeamRepository.DeleteByProjectIdAndTraineeIdAsync(existingLead.ProjectId, existingLead.TraineeId);
+                    await _projecTeamRepository.DeleteAsync(existingLead.Id);
                 }
 
                 // Add new team lead
@@ -164,7 +164,7 @@ namespace IlpRepoBackend.Application.Handler.Users
                 var existingScrumMaster = existingTeamMembers.FirstOrDefault(pt => pt.Role == ProjectRole.ScrumMaster);
                 if (existingScrumMaster != null)
                 {
-                    await _projecTeamRepository.DeleteByProjectIdAndTraineeIdAsync(existingScrumMaster.ProjectId, existingScrumMaster.TraineeId);
+                    await _projecTeamRepository.DeleteAsync(existingScrumMaster.Id);
                 }
 
                 // Add new scrum master
@@ -182,7 +182,11 @@ namespace IlpRepoBackend.Application.Handler.Users
             if (dto.Mentors != null)
             {
                 // Remove existing mentors
-                await _mentorForPRojectRepository.DeleteAllByProjectIdAsync(request.ProjectId);
+                var existingMentors = await _mentorForPRojectRepository.GetByProjectIdAsync(request.ProjectId);
+                foreach (var mentor in existingMentors)
+                {
+                    await _mentorForPRojectRepository.DeleteAsync(mentor.Id);
+                }
 
                 // Add new mentors
                 var mentorIds = new List<int>();
@@ -232,7 +236,11 @@ namespace IlpRepoBackend.Application.Handler.Users
             if (dto.Pocs != null)
             {
                 // Remove existing POCs
-                await _pocForAProjectRepository.DeleteAllByProjectIdAsync(request.ProjectId);
+                var existingPocs = await _pocForAProjectRepository.GetByProjectIdAsync(request.ProjectId);
+                foreach (var poc in existingPocs)
+                {
+                    await _pocForAProjectRepository.DeleteAsync(poc.Id);
+                }
 
                 // Add new POCs
                 var pocIds = new List<int>();
@@ -282,4 +290,7 @@ namespace IlpRepoBackend.Application.Handler.Users
             return ApiResponse<ProjectDto>.Success(projectDto);
         }
     }
+
+    // ==================== DELETE HANDLER ====================
+    
 }
