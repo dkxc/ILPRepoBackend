@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialCreate1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -133,6 +133,7 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     password_hash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     role = table.Column<string>(type: "text", nullable: false),
@@ -227,6 +228,7 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     project_id = table.Column<int>(type: "integer", nullable: true),
                     mentor_type = table.Column<string>(type: "text", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
@@ -250,6 +252,7 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     project_id = table.Column<int>(type: "integer", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
@@ -627,6 +630,12 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_mentors_email",
+                table: "mentors",
+                column: "email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_mentors_project_id",
                 table: "mentors",
                 column: "project_id");
@@ -635,6 +644,12 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 name: "IX_notifications_document_request_id",
                 table: "notifications",
                 column: "document_request_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_pocs_email",
+                table: "pocs",
+                column: "email",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_pocs_project_id",
@@ -704,9 +719,9 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 column: "batch_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_users_username",
+                name: "IX_users_email",
                 table: "users",
-                column: "username",
+                column: "email",
                 unique: true);
         }
 

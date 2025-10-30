@@ -1,12 +1,24 @@
+<<<<<<< HEAD
 using IlpRepoBackend.Domain.Entities;
 using IlpRepoBackend.Domain.Persistence;
 using IlpRepoBackend.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
+=======
+﻿using IlpRepoBackend.Domain.Entities;
+using IlpRepoBackend.Domain.Persistence;
+using IlpRepoBackend.Infrastructure.Context;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+>>>>>>> b1a77052b2965f66ef4845525863870bf757b159
 
 namespace IlpRepoBackend.Infrastructure.Repositories
 {
     public class ProjectRepository : GenericRepository<Project>, IProjectRepository
     {
+<<<<<<< HEAD
         public ProjectRepository(AppDbContext context) : base(context)
         {
         }
@@ -87,6 +99,12 @@ namespace IlpRepoBackend.Infrastructure.Repositories
         {
             return await _context.ProjectTeams
                 .AnyAsync(pt => pt.ProjectId == projectId && pt.TraineeId == traineeId);
+=======
+        private readonly AppDbContext _context;
+        public ProjectRepository(AppDbContext context) : base(context)
+        {
+            _context = context;
+>>>>>>> b1a77052b2965f66ef4845525863870bf757b159
         }
     }
 }
