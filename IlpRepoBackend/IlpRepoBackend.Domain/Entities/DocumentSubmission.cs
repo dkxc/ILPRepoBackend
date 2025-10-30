@@ -11,6 +11,8 @@ namespace IlpRepoBackend.Domain.Entities
         public int Id { get; set; }
         public int? DocumentId { get; set; }
         public int? RequestId { get; set; }
+        public string? FileName { get; set; } // Original file name (e.g., "project_brd_final.pdf")
+        public string? FileType { get; set; } // File extension/type (e.g., "PDF", "Excel")
         public string? SubmissionLink { get; set; } // NEW PROPERTY
         public DateTime SubmissionDate { get; set; }
         public DateTime CreatedAt { get; set; }

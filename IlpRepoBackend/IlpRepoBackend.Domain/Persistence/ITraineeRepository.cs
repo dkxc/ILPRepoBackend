@@ -10,6 +10,7 @@ namespace IlpRepoBackend.Domain.Persistence
     public interface ITraineeRepository :IGenericRepository<Trainee>
     {
         Task<IEnumerable<Trainee>> GetByBatchIdAsync(int batchId);
+        Task<Trainee>  GetByName(String name);
         Task<object> GetTraineesByBatchId(object batchId);
     }
 }

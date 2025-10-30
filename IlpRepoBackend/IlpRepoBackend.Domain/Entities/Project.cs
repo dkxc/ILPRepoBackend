@@ -18,9 +18,13 @@ namespace IlpRepoBackend.Domain.Entities
         public DateTime UpdatedAt { get; set; }
 
         public ICollection<ProjectTeam> ProjectTeams { get; set; } = new List<ProjectTeam>();
-        public ICollection<Mentor> Mentors { get; set; } = new List<Mentor>();
-        public ICollection<Poc> Pocs { get; set; } = new List<Poc>();
+        public ICollection<PocsForProject> PocsForProjects { get; set; } = new List<PocsForProject>();
+
+        public ICollection<MenterForAProject> MentersForProjects { get; set; } = new List<MenterForAProject>();
         public ICollection<ProjectLink> ProjectLinks { get; set; } = new List<ProjectLink>();
         public ICollection<DocumentRequest> DocumentRequests { get; set; } = new List<DocumentRequest>();
+        //public ICollection<MenterForAProject> MentersForProjects { get; set; } = new List<MenterForAProject>();
+        //public ICollection<PocsForProject> PocsForProjects { get; set; } = new List<PocsForProject>();
+
     }
 }

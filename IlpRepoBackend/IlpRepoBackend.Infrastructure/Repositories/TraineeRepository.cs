@@ -13,6 +13,7 @@ namespace IlpRepoBackend.Infrastructure.Repositories
     public class TraineeRepository : GenericRepository<Trainee>, ITraineeRepository
     {
         private readonly AppDbContext _context;
+
         public TraineeRepository(AppDbContext context) : base(context)
         {
             _context = context;
@@ -21,6 +22,13 @@ namespace IlpRepoBackend.Infrastructure.Repositories
         public async Task<IEnumerable<Trainee>> GetByBatchIdAsync(int batchId)
         {
             return await _context.Trainees.Where(t => t.BatchId == batchId).ToListAsync();
+        }
+
+        public Task<Trainee?> GetByName(string name)
+        {
+            return _context.Trainees
+                .Include(t => t.User)
+                .FirstOrDefaultAsync(t => t.User.Username == name);
         }
 
         public Task<object> GetTraineesByBatchId(object batchId)

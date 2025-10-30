@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate1 : Migration
+    public partial class InitialCreateSupabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -107,6 +107,39 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_links", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "mentors",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    mentor_type = table.Column<string>(type: "text", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_mentors", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "pocs",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_pocs", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -222,50 +255,56 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "mentors",
+                name: "menter_for_project",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    project_id = table.Column<int>(type: "integer", nullable: true),
-                    mentor_type = table.Column<string>(type: "text", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                    mentor_id = table.Column<int>(type: "integer", nullable: false),
+                    project_id = table.Column<int>(type: "integer", nullable: false),
+                    mentor_type = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_mentors", x => x.id);
+                    table.PrimaryKey("PK_menter_for_project", x => x.id);
                     table.ForeignKey(
-                        name: "FK_mentors_projects_project_id",
+                        name: "FK_menter_for_project_mentors_mentor_id",
+                        column: x => x.mentor_id,
+                        principalTable: "mentors",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_menter_for_project_projects_project_id",
                         column: x => x.project_id,
                         principalTable: "projects",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "pocs",
+                name: "pocs_for_project",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    project_id = table.Column<int>(type: "integer", nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                    poc_id = table.Column<int>(type: "integer", nullable: false),
+                    project_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_pocs", x => x.id);
+                    table.PrimaryKey("PK_pocs_for_project", x => x.id);
                     table.ForeignKey(
-                        name: "FK_pocs_projects_project_id",
+                        name: "FK_pocs_for_project_pocs_poc_id",
+                        column: x => x.poc_id,
+                        principalTable: "pocs",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_pocs_for_project_projects_project_id",
                         column: x => x.project_id,
                         principalTable: "projects",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -344,6 +383,8 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     document_id = table.Column<int>(type: "integer", nullable: true),
                     request_id = table.Column<int>(type: "integer", nullable: true),
+                    file_name = table.Column<string>(type: "text", nullable: true),
+                    file_type = table.Column<string>(type: "text", nullable: true),
                     submission_link = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     submission_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
@@ -443,6 +484,8 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 name: "project_team",
                 columns: table => new
                 {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     project_id = table.Column<int>(type: "integer", nullable: false),
                     trainee_id = table.Column<int>(type: "integer", nullable: false),
                     role = table.Column<string>(type: "text", nullable: false),
@@ -451,7 +494,7 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_project_team", x => new { x.project_id, x.trainee_id });
+                    table.PrimaryKey("PK_project_team", x => x.id);
                     table.ForeignKey(
                         name: "FK_project_team_projects_project_id",
                         column: x => x.project_id,
@@ -630,15 +673,20 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_menter_for_project_mentor_id",
+                table: "menter_for_project",
+                column: "mentor_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_menter_for_project_project_id",
+                table: "menter_for_project",
+                column: "project_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_mentors_email",
                 table: "mentors",
                 column: "email",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_mentors_project_id",
-                table: "mentors",
-                column: "project_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_notifications_document_request_id",
@@ -652,8 +700,13 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_pocs_project_id",
-                table: "pocs",
+                name: "IX_pocs_for_project_poc_id",
+                table: "pocs_for_project",
+                column: "poc_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_pocs_for_project_project_id",
+                table: "pocs_for_project",
                 column: "project_id");
 
             migrationBuilder.CreateIndex(
@@ -665,6 +718,12 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 name: "IX_project_links_project_id",
                 table: "project_links",
                 column: "project_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_project_team_project_id_trainee_id",
+                table: "project_team",
+                columns: new[] { "project_id", "trainee_id" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_project_team_trainee_id",
@@ -738,13 +797,13 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 name: "feedback_header_responses");
 
             migrationBuilder.DropTable(
-                name: "mentors");
+                name: "menter_for_project");
 
             migrationBuilder.DropTable(
                 name: "notifications");
 
             migrationBuilder.DropTable(
-                name: "pocs");
+                name: "pocs_for_project");
 
             migrationBuilder.DropTable(
                 name: "project_links");
@@ -774,7 +833,13 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 name: "feedbacks");
 
             migrationBuilder.DropTable(
+                name: "mentors");
+
+            migrationBuilder.DropTable(
                 name: "document_requests");
+
+            migrationBuilder.DropTable(
+                name: "pocs");
 
             migrationBuilder.DropTable(
                 name: "links");
