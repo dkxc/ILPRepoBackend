@@ -10,5 +10,7 @@ namespace IlpRepoBackend.Domain.Persistence
 {
     public interface IDocumentRepository : IGenericRepository<Documents>
     {
+        Task<IEnumerable<Documents>> GetAllDocumentTypesAsync();
+        Task<Documents?> GetDocumentWithLinkAsync(int documentId);
     }
 }
