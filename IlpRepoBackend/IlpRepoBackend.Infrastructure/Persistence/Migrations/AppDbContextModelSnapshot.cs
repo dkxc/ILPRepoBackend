@@ -205,6 +205,11 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("due_date");
 
+                    b.Property<string>("FileUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("file_url");
+
                     b.Property<int?>("ProjectId")
                         .HasColumnType("integer")
                         .HasColumnName("project_id");
@@ -249,6 +254,20 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("document_id");
 
+                    b.Property<string>("FileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("file_name");
+
+                    b.Property<string>("FileType")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("file_type");
+
+                    b.Property<int?>("ProjectId")
+                        .HasColumnType("integer")
+                        .HasColumnName("project_id");
+
                     b.Property<int?>("RequestId")
                         .HasColumnType("integer")
                         .HasColumnName("request_id");
@@ -264,6 +283,10 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("submission_link");
 
+                    b.Property<int?>("TraineeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("trainee_id");
+
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -274,7 +297,11 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("DocumentId");
 
+                    b.HasIndex("ProjectId");
+
                     b.HasIndex("RequestId");
+
+                    b.HasIndex("TraineeId");
 
                     b.ToTable("document_submissions", (string)null);
                 });
@@ -294,16 +321,21 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
-                    b.Property<string>("Link")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("link");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
+
+                    b.Property<string>("TemplateLink")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("template_link");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("type");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -1114,14 +1146,28 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasForeignKey("DocumentId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("IlpRepoBackend.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("IlpRepoBackend.Domain.Entities.DocumentRequest", "DocumentRequest")
                         .WithMany("DocumentSubmissions")
                         .HasForeignKey("RequestId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("IlpRepoBackend.Domain.Entities.Trainee", "Trainee")
+                        .WithMany()
+                        .HasForeignKey("TraineeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Document");
 
                     b.Navigation("DocumentRequest");
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Trainee");
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Feedback", b =>

@@ -13,6 +13,7 @@ namespace IlpRepoBackend.Domain.Entities
         public int? DocumentId { get; set; }
         public DateTime RequestDate { get; set; }
         public DateTime DueDate { get; set; }
+        public string? FileUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
