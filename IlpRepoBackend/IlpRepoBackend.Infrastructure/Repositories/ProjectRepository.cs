@@ -57,11 +57,26 @@ namespace IlpRepoBackend.Infrastructure.Repositories
                     .ThenInclude(m => m.Mentor)
                 .Include(p => p.PocsForProjects)
                     .ThenInclude(p => p.Poc)
+                .Include(p => p.ProjectLinks)
+                    .ThenInclude(pl => pl.Link)
                 .Include(p => p.DocumentRequests)
                     .ThenInclude(dr => dr.Document)
                 .Include(p => p.DocumentRequests)
                     .ThenInclude(dr => dr.DocumentSubmissions)
                 .FirstOrDefaultAsync(p => p.Id == projectId);
+        }
+
+        public async Task<IEnumerable<Project>> GetProjectsByBatchIdAsync(int batchId)
+        {
+            return await _context.Projects
+                .Include(p => p.ProjectTeams)
+                    .ThenInclude(pt => pt.Trainee)
+                        .ThenInclude(t => t.User)
+                .Include(p => p.ProjectLinks)
+                    .ThenInclude(pl => pl.Link)
+                .Where(p => p.ProjectTeams.Any(pt => pt.Trainee != null && pt.Trainee.BatchId == batchId))
+                .Distinct()
+                .ToListAsync();
         }
     }
 }

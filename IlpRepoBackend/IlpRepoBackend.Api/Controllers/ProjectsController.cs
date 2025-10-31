@@ -42,9 +42,9 @@ namespace IlpRepoBackend.API.Controllers
                     actionName: "GetById", // name of the GET method for this resource
                     routeValues: new { id = result.Data.Id }, // route parameters for that action
                     value: new { message = "Project created successfully", data = result.Data } // response body
-);
-
+            );
         }
+
         /// <summary>
         /// Create multiple projects for a single batch
         /// </summary>
@@ -61,6 +61,7 @@ namespace IlpRepoBackend.API.Controllers
 
             return BadRequest(result);
         }
+
         [HttpGet]
         public async Task<ActionResult<ApiResponse<List<ProjectDto>>>> GetAll(
             [FromQuery] int? batchId = null,
@@ -92,7 +93,37 @@ namespace IlpRepoBackend.API.Controllers
         }
 
         /// <summary>
-        /// Update project
+        /// Get project details by ID - includes project name, status, progress, technology stack, trainees with name and email, and project links with link type name
+        /// </summary>
+        [HttpGet("{id}/details")]
+        public async Task<ActionResult<ApiResponse<ProjectDetailsDto>>> GetProjectDetailsById(int id)
+        {
+            var query = new GetProjectDetailsByIdQuery(id);
+            var result = await _mediator.Send(query);
+
+            if (result.Succeeded)
+                return Ok(result);
+
+            return NotFound(result);
+        }
+
+        /// <summary>
+        /// Update project technology stack
+        /// </summary>
+        [HttpPut("{id}/technology")]
+        public async Task<ActionResult<ApiResponse<bool>>> UpdateProjectTechnology(int id, [FromBody] UpdateTechnologyDto technologyDto)
+        {
+            var command = new UpdateProjectTechnologyCommand(id, technologyDto.Technology);
+            var result = await _mediator.Send(command);
+
+            if (result.Succeeded)
+                return Ok(result);
+
+            return BadRequest(result);
+        }
+
+        /// <summary>
+        /// Add or update a project link - automatically creates new or updates existing based on link type
         /// </summary>
         
         [HttpPut("{id}")]
@@ -121,6 +152,16 @@ namespace IlpRepoBackend.API.Controllers
             return Ok(new { message = "Project deleted successfully" });
         }
 
+        [HttpPut("{id}/links")]
+        public async Task<ActionResult<ApiResponse<bool>>> UpsertProjectLink(int id, [FromBody] AddProjectLinkDto linkData)
+        {
+            var command = new UpsertProjectLinkCommand(id, linkData.LinkId, linkData.LinkUrl);
+            var result = await _mediator.Send(command);
 
+            if (result.Succeeded)
+                return Ok(result);
+
+            return BadRequest(result);
+        }
     }
 }

@@ -31,6 +31,8 @@ namespace IlpRepoBackend.Infrastructure
             services.AddScoped<IMentorForPRojectRepository, MentorForPRojectRepository>();
             services.AddScoped<IPocRepository, PocRepository>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IProjectLinkRepository, ProjectLinkRepository>();
+            services.AddScoped<ILinkRepository, LinkRepository>();
 
             return services;
         }
