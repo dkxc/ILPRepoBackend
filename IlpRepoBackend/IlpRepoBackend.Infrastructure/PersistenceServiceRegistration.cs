@@ -2,6 +2,7 @@
 using IlpRepoBackend.Domain.Persistence;
 using IlpRepoBackend.Infrastructure.Context;
 using IlpRepoBackend.Infrastructure.Repositories;
+using IlpRepoBackend.Infrastructure.Service;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +30,7 @@ namespace IlpRepoBackend.Infrastructure
             services.AddScoped<IMentorRepository, MenterRepository>();
             services.AddScoped<IMentorForPRojectRepository, MentorForPRojectRepository>();
             services.AddScoped<IPocRepository, PocRepository>();
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }

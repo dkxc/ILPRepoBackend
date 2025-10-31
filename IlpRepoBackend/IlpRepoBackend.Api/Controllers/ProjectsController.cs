@@ -15,6 +15,7 @@ namespace IlpRepoBackend.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ProjectsController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -25,6 +26,7 @@ namespace IlpRepoBackend.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] CreateProjectDto projectDto)
         {
             if (!ModelState.IsValid)
@@ -93,6 +95,32 @@ namespace IlpRepoBackend.API.Controllers
         /// Update project
         /// </summary>
         
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] CreateProjectDto updateProjectDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var command = new UpdateProjectCommand(id, updateProjectDto);
+            var result = await _mediator.Send(command);
+            if (!result.Succeeded)
+                return BadRequest(new { message = result.Message });
+            return Ok(new { message = "Project updated successfully", data = result.Data });
+        }
+
+        /// <summary>
+        /// Delete project
+        /// </summary>
+        
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var command = new DeleteProjectCommand(id);
+            var result = await _mediator.Send(command);
+            if (!result.Succeeded)
+                return BadRequest(new { message = result.Message });
+            return Ok(new { message = "Project deleted successfully" });
+        }
+
 
     }
 }
