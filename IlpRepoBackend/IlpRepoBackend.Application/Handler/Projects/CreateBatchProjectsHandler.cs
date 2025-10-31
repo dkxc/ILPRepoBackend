@@ -77,15 +77,15 @@ namespace IlpRepoBackend.Application.Handler.Projects
 
                 try
                 {
-                    var result = await CreateSingleProject(projectInfo, dto.BatchId, batchTrainees, projectNumber);
+                    var projectDto = await CreateSingleProject(projectInfo, dto.BatchId, batchTrainees, projectNumber);
 
-                    if (result.Succeeded)
+                    if (projectDto != null)
                     {
-                        createdProjectDtos.Add(result.Data);
+                        createdProjectDtos.Add(projectDto);
                     }
                     else
                     {
-                        errors.Add($"Project {projectNumber} ({projectInfo.ProjectName}): {result.Message}");
+                        errors.Add($"Project {projectNumber} ({projectInfo.ProjectName}): Failed to create");
                     }
                 }
                 catch (Exception ex)
@@ -94,23 +94,29 @@ namespace IlpRepoBackend.Application.Handler.Projects
                 }
             }
 
-            // 4️⃣ Return results
-            if (createdProjectDtos.Any() && !errors.Any())
+            // 4️⃣ Validate all projects were created
+            int expectedCount = dto.Projects.Count;
+            int actualCount = createdProjectDtos.Count;
+
+            if (actualCount == expectedCount && !errors.Any())
             {
-                return ApiResponse<List<ProjectDto>>.Success(createdProjectDtos, $"Successfully created {createdProjectDtos.Count} projects");
+                return ApiResponse<List<ProjectDto>>.Success(
+                    createdProjectDtos,
+                    $"Successfully created all {actualCount} projects");
             }
-            else if (createdProjectDtos.Any() && errors.Any())
+            else if (actualCount > 0 && errors.Any())
             {
-                var message = $"Partially successful: Created {createdProjectDtos.Count} projects. Errors: {string.Join("; ", errors)}";
+                var message = $"Partially successful: Created {actualCount}/{expectedCount} projects. Errors: {string.Join("; ", errors)}";
                 return ApiResponse<List<ProjectDto>>.Success(createdProjectDtos, message);
             }
             else
             {
-                return ApiResponse<List<ProjectDto>>.Fail($"Failed to create any projects. Errors: {string.Join("; ", errors)}");
+                return ApiResponse<List<ProjectDto>>.Fail(
+                    $"Failed to create any projects. Errors: {string.Join("; ", errors)}");
             }
         }
 
-        private async Task<ApiResponse<ProjectDto>> CreateSingleProject(
+        private async Task<ProjectDto?> CreateSingleProject(
             ProjectCreateInfo projectInfo,
             int batchId,
             List<Trainee> batchTrainees,
@@ -122,11 +128,11 @@ namespace IlpRepoBackend.Application.Handler.Projects
             {
                 var leadUser = await _userRepository.GetByUsernameAsync(projectInfo.TeamLeadName.Trim());
                 if (leadUser == null)
-                    return ApiResponse<ProjectDto>.Fail($"Team Lead '{projectInfo.TeamLeadName}' not found");
+                    throw new InvalidOperationException($"Team Lead '{projectInfo.TeamLeadName}' not found");
 
                 teamLead = batchTrainees.FirstOrDefault(t => t.UserId == leadUser.Id);
                 if (teamLead == null)
-                    return ApiResponse<ProjectDto>.Fail($"Team Lead '{projectInfo.TeamLeadName}' not in batch");
+                    throw new InvalidOperationException($"Team Lead '{projectInfo.TeamLeadName}' not in batch");
             }
 
             // Validate Scrum Master
@@ -135,11 +141,11 @@ namespace IlpRepoBackend.Application.Handler.Projects
             {
                 var scrumUser = await _userRepository.GetByUsernameAsync(projectInfo.ScrumMasterName.Trim());
                 if (scrumUser == null)
-                    return ApiResponse<ProjectDto>.Fail($"Scrum Master '{projectInfo.ScrumMasterName}' not found");
+                    throw new InvalidOperationException($"Scrum Master '{projectInfo.ScrumMasterName}' not found");
 
                 scrumMaster = batchTrainees.FirstOrDefault(t => t.UserId == scrumUser.Id);
                 if (scrumMaster == null)
-                    return ApiResponse<ProjectDto>.Fail($"Scrum Master '{projectInfo.ScrumMasterName}' not in batch");
+                    throw new InvalidOperationException($"Scrum Master '{projectInfo.ScrumMasterName}' not in batch");
             }
 
             // Validate team members
@@ -150,11 +156,11 @@ namespace IlpRepoBackend.Application.Handler.Projects
                 {
                     Trainee? member = await _traineeRepository.GetByName(name);
                     if (member == null)
-                        return ApiResponse<ProjectDto>.Fail($"Trainee '{name}' not found");
+                        throw new InvalidOperationException($"Trainee '{name}' not found");
 
                     var trainee = batchTrainees.FirstOrDefault(t => t.Id == member.Id);
                     if (trainee == null)
-                        return ApiResponse<ProjectDto>.Fail($"Trainee '{name}' not in batch");
+                        throw new InvalidOperationException($"Trainee '{name}' not in batch");
 
                     teamMemberTrainees.Add(member);
                 }
@@ -236,7 +242,7 @@ namespace IlpRepoBackend.Application.Handler.Projects
 
             var createdProject = await _projectRepository.AddAsync(project);
             if (createdProject == null)
-                return ApiResponse<ProjectDto>.Fail("Failed to create project");
+                throw new InvalidOperationException("Failed to create project in database");
 
             // Add team members
             foreach (var member in teamMemberTrainees)
@@ -302,13 +308,43 @@ namespace IlpRepoBackend.Application.Handler.Projects
                 });
             }
 
-            // Return full project with details
-            var fullProject = await _projectRepository.GetProjectWithDetailsAsync(createdProject.Id);
-            if (fullProject == null)
-                return ApiResponse<ProjectDto>.Fail("Failed to retrieve created project");
+            // Create DTO immediately after creation
+            var projectDto = new ProjectDto
+            {
+                Id = createdProject.Id,
+                ProjectName = createdProject.ProjectName,
+                Technology = createdProject.Technology,
+                Status = createdProject.Status,
+                Progress = createdProject.Progress,
+                TeamMembers = teamMemberTrainees.Select(t => t.User?.Username ?? "Unknown").ToList(),
 
-            var projectDto = _mapper.Map<ProjectDto>(fullProject);
-            return ApiResponse<ProjectDto>.Success(projectDto);
+                TeamLead = teamLead?.User?.Username,
+                ScrumMaster = scrumMaster?.User?.Username,
+                Mentors = mentorIds.Distinct().Select(async id =>
+                {
+                    var m = await _mentorRepository.GetByIdAsync(id);
+                    return m;
+                }).Select(t => t.Result).ToList(),
+                //MentorNames = mentorIds.Distinct().Select(async id =>
+                //{
+                //    var m = await _mentorRepository.GetByIdAsync(id);
+                //    return m?.Name ?? "Unknown";
+                //}).Select(t => t.Result).ToList(),
+                Pocs = pocIds.Distinct().Select(async id =>
+                {
+                    var p = await _pocRepository.GetByIdAsync(id);
+                    return p;
+                }).Select(t => t.Result).ToList(),
+                //PocNames = pocIds.Distinct().Select(async id =>
+                //{
+                //    var p = await _pocRepository.GetByIdAsync(id);
+                //    return p?.Name ?? "Unknown";
+                //}).Select(t => t.Result).ToList()
+                CreatedAt = createdProject.CreatedAt,
+                UpdatedAt=createdProject.UpdatedAt,
+            };
+
+            return projectDto;
         }
     }
 }

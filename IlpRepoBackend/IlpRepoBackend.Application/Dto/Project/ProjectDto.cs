@@ -26,6 +26,8 @@ namespace IlpRepoBackend.Application.Dto.Project
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public string? TeamLead { get; internal set; }
+        public string? ScrumMaster { get; internal set; }
     }
 
 }
