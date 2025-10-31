@@ -23,6 +23,7 @@ namespace IlpRepoBackend.Application.Wrapper
             Status = statusCode;
             Data = data;
             Message = message;
+            Succeeded = statusCode >= 200 && statusCode < 300; // Set Succeeded based on status code
         }
 
         public ApiResponse(TraineeDto res, string v)
@@ -46,6 +47,5 @@ namespace IlpRepoBackend.Application.Wrapper
         {
             return new ApiResponse<T>(StatusCode.BadRequest, default, message);
         }
-
     }
 }
