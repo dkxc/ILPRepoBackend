@@ -35,5 +35,15 @@ namespace IlpRepoBackend.API.Controllers
 
             return Ok(response);
         }
+        [HttpPost("validate-token")]
+        public async Task<IActionResult> ValidateToken([FromBody] ValidateTokenQuery query)
+        {
+            var result = await _mediator.Send(query);
+
+            if (!result)
+                return Unauthorized(new { message = "Invalid or expired token" });
+
+            return Ok(new { message = "Valid token" });
+        }
     }
 }

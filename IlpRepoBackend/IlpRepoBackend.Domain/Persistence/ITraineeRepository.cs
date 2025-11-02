@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace IlpRepoBackend.Domain.Persistence
 {
-    public interface ITraineeRepository :IGenericRepository<Trainee>
+    public interface ITraineeRepository : IGenericRepository<Trainee>
     {
-        Task<IEnumerable<Trainee>> GetByBatchIdAsync(int batchId);
-        Task<Trainee>  GetByName(String name);
+        Task<List<Trainee>> GetByBatchIdAsync(int batchId);
+        Task<Trainee?> GetByName(string name);
         Task<object> GetTraineesByBatchId(object batchId);
+        Task<List<Trainee>> GetTraineesByBatchId(int batchId);
     }
 }

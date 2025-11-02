@@ -22,7 +22,7 @@ namespace IlpRepoBackend.Infrastructure.Service
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
+            
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
@@ -30,14 +30,14 @@ namespace IlpRepoBackend.Infrastructure.Service
                 new Claim(ClaimTypes.Role, role.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-
+            
             var token = new JwtSecurityToken(
                 issuer: _config["JWT:Issuer"],
                 audience: _config["JWT:Audience"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(50),
                 signingCredentials: credentials);
-
+            
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
@@ -57,5 +57,33 @@ namespace IlpRepoBackend.Infrastructure.Service
                 return false;
             }
         }
+        public bool ValidateToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_config["JWT:Key"]);
+
+            try
+            {
+                var validationParams = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = _config["JWT:Issuer"],
+                    ValidAudience = _config["JWT:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateLifetime = true, // important — checks expiry
+                    ClockSkew = TimeSpan.Zero // no time buffer
+                };
+
+                tokenHandler.ValidateToken(token, validationParams, out SecurityToken validatedToken);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
     }
 }
