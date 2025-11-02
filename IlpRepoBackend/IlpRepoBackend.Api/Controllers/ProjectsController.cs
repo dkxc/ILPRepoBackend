@@ -15,7 +15,7 @@ namespace IlpRepoBackend.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     public class ProjectsController : ControllerBase
     {
         private readonly IMediator _mediator;

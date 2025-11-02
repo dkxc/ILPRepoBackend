@@ -3,6 +3,8 @@ using IlpRepoBackend.Domain.Persistence;
 using IlpRepoBackend.Infrastructure.Context;
 using IlpRepoBackend.Infrastructure.Repositories;
 using IlpRepoBackend.Infrastructure.Service;
+using IlpRepoBackend.Infrastructure.Services;
+using IlpRepoBackend.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +35,10 @@ namespace IlpRepoBackend.Infrastructure
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IProjectLinkRepository, ProjectLinkRepository>();
             services.AddScoped<ILinkRepository, LinkRepository>();
+            services.AddScoped<IDocumentRepository, DocumentRepository>();
+            services.AddScoped<IDocumentRequestRepository, DocumentRequestRepository>();
+            services.AddScoped<IDocumentSubmissionRepository, DocumentSubmissionRepository>();
+            services.AddScoped<IFileStorageService, SupabaseStorageService>();
 
             return services;
         }
