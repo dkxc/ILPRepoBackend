@@ -7,4 +7,5 @@ public interface IProjectRepository : IGenericRepository<Project>
     Task<IEnumerable<Project>> GetAllProjectsWithDetailsAsync(); // Fixed return type
     Task GetByIdWithDetailsAsync(int id);
     Task<Project?> GetProjectWithDetailsAsync(int projectId);
+    Task<IEnumerable<Project>> GetProjectsByBatchIdAsync(int batchId);
 }

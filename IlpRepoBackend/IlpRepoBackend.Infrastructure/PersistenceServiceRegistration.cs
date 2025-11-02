@@ -43,6 +43,8 @@ namespace IlpRepoBackend.Infrastructure
 
             // Register background service
             services.AddHostedService<DocumentReminderBackgroundService>();
+            services.AddScoped<IProjectLinkRepository, ProjectLinkRepository>();
+            services.AddScoped<ILinkRepository, LinkRepository>();
 
             return services;
         }
