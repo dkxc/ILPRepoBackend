@@ -51,5 +51,20 @@ namespace IlpRepoBackend.Api.Controllers
 
             return BadRequest(result);
         }
+
+        /// <summary>
+        /// Delete a document submission to allow resubmission
+        /// </summary>
+        [HttpDelete("{submissionId}")]
+        public async Task<ActionResult<ApiResponse<bool>>> DeleteDocumentSubmission(int submissionId)
+        {
+            var command = new DeleteDocumentSubmissionCommand(submissionId);
+            var result = await _mediator.Send(command);
+
+            if (result.Succeeded)
+                return Ok(result);
+
+            return BadRequest(result);
+        }
     }
 }
