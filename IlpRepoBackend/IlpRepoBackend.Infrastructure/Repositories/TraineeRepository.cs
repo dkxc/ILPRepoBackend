@@ -28,7 +28,7 @@ namespace IlpRepoBackend.Infrastructure.Repositories
 
             _context = context;
 
-
+        }
         public override async Task<IEnumerable<Trainee>> GetAllAsync()
 
         {
