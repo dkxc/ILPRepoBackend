@@ -10,5 +10,9 @@ namespace IlpRepoBackend.Domain.Persistence
     public interface IDocumentRequestRepository : IGenericRepository<DocumentRequest>
     {
         Task<IEnumerable<DocumentRequest>> GetByProjectIdAsync(int projectId);
+        Task<IEnumerable<DocumentRequest>> GetPendingRequestsDueByDateAsync(DateTime dueDate);
+        Task<DocumentRequest?> GetWithDetailsAsync(int id);
+        //Task<IEnumerable<DocumentRequest>> GetPendingRequestsDueByDateAsync(DateTime dueDate);
+        //Task<DocumentRequest?> GetWithDetailsAsync(int id);
     }
 }

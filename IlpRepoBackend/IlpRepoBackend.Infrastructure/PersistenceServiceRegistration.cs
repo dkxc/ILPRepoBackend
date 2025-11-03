@@ -1,4 +1,6 @@
-﻿using IlpRepoBackend.Domain.Entities;
+﻿using IlpRepoBackend.Application.BackgroundServices;
+using IlpRepoBackend.Application.Services;
+using IlpRepoBackend.Domain.Entities;
 using IlpRepoBackend.Domain.Persistence;
 using IlpRepoBackend.Infrastructure.Context;
 using IlpRepoBackend.Infrastructure.Repositories;
@@ -31,6 +33,16 @@ namespace IlpRepoBackend.Infrastructure
             services.AddScoped<IMentorForPRojectRepository, MentorForPRojectRepository>();
             services.AddScoped<IPocRepository, PocRepository>();
             services.AddScoped<IAuthService, AuthService>();
+            // Register repositories
+            services.AddScoped<IEmailConfigurationRepository, EmailConfigurationRepository>();
+            services.AddScoped<IEmailLogRepository, EmailLogRepository>();
+            services.AddScoped<IDocumentRequestRepository, DocumentRequestRepository>();
+
+            // Register email service
+            services.AddScoped<IEmailService, EmailService>();
+
+            // Register background service
+            services.AddHostedService<DocumentReminderBackgroundService>();
             services.AddScoped<IProjectLinkRepository, ProjectLinkRepository>();
             services.AddScoped<ILinkRepository, LinkRepository>();
 

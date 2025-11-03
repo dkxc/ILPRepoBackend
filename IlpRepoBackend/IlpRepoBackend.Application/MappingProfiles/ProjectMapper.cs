@@ -9,15 +9,25 @@ namespace IlpRepoBackend.Application.Mapping
     {
         public ProjectMappingProfile()
         {
+            // Create mappings for nested DTOs first
+            CreateMap<Mentor, MentorDto>();
+            CreateMap<Poc, PocDto>();
+            CreateMap<DocumentRequest, DocumentRequestDto>()
+                .ForMember(dest => dest.DocumentName, opt => opt.MapFrom(src => src.Document != null ? src.Document.Name : null));
+            CreateMap<DocumentSubmission, DocumentSubmissionDto>();
+
             // Project Entity -> ProjectDto
             CreateMap<Project, ProjectDto>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.ProjectName, opt => opt.MapFrom(src => src.ProjectName))
-                .ForMember(dest => dest.Technology, opt => opt.MapFrom(src => src.Technology))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
-                .ForMember(dest => dest.Progress, opt => opt.MapFrom(src => src.Progress))
-                .ForMember(dest => dest.BatchId, opt => opt.Ignore()) // Set manually if needed
-                .ForMember(dest => dest.BatchName, opt => opt.Ignore()) // Set manually if needed
+                .ForMember(dest => dest.BatchId, opt => opt.MapFrom(src =>
+                    src.ProjectTeams != null && src.ProjectTeams.Any() && src.ProjectTeams.First().Trainee != null
+                        ? src.ProjectTeams.First().Trainee.BatchId
+                        : 0))
+                .ForMember(dest => dest.BatchName, opt => opt.MapFrom(src =>
+                    src.ProjectTeams != null && src.ProjectTeams.Any() &&
+                    src.ProjectTeams.First().Trainee != null &&
+                    src.ProjectTeams.First().Trainee.Batch != null
+                        ? src.ProjectTeams.First().Trainee.Batch.BatchName ?? string.Empty
+                        : string.Empty))
                 .ForMember(dest => dest.TeamMembers, opt => opt.MapFrom(src =>
                     src.ProjectTeams != null
                         ? src.ProjectTeams
@@ -41,18 +51,34 @@ namespace IlpRepoBackend.Application.Mapping
                             .Select(p => p.Poc)
                             .ToList()
                         : new List<Poc>()))
-                .ForMember(dest => dest.documentRequest, opt => opt.MapFrom(src =>
+                .ForMember(dest => dest.DocumentRequests, opt => opt.MapFrom(src =>
                     src.DocumentRequests != null
                         ? src.DocumentRequests.ToList()
                         : new List<DocumentRequest>()))
-                .ForMember(dest => dest.documentSubmissions, opt => opt.MapFrom(src =>
+                .ForMember(dest => dest.DocumentSubmissions, opt => opt.MapFrom(src =>
                     src.DocumentRequests != null
                         ? src.DocumentRequests
                             .SelectMany(dr => dr.DocumentSubmissions ?? new List<DocumentSubmission>())
                             .ToList()
                         : new List<DocumentSubmission>()))
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
-                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt));
+                .ForMember(dest => dest.TeamLead, opt => opt.MapFrom(src =>
+                    src.ProjectTeams != null
+                        ? src.ProjectTeams
+                            .Where(pt => pt.Role == Domain.Enum.ProjectRole.TeamLead &&
+                                        pt.Trainee != null &&
+                                        pt.Trainee.User != null)
+                            .Select(pt => pt.Trainee.User.Username)
+                            .FirstOrDefault()
+                        : null))
+                .ForMember(dest => dest.ScrumMaster, opt => opt.MapFrom(src =>
+                    src.ProjectTeams != null
+                        ? src.ProjectTeams
+                            .Where(pt => pt.Role == Domain.Enum.ProjectRole.ScrumMaster &&
+                                        pt.Trainee != null &&
+                                        pt.Trainee.User != null)
+                            .Select(pt => pt.Trainee.User.Username)
+                            .FirstOrDefault()
+                        : null));
 
             // Reverse mapping if needed
             CreateMap<ProjectDto, Project>()

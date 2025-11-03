@@ -43,7 +43,8 @@ namespace IlpRepoBackend.Infrastructure.Context
         public DbSet<PocsForProject> PocsForProjects { get; set; }
         public DbSet<MenterForAProject> MentersForProjects { get; set; }
 
-
+        public DbSet<EmailConfiguration> EmailConfigurations { get; set; }
+        public DbSet<EmailLog> EmailLogs { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -554,6 +555,22 @@ namespace IlpRepoBackend.Infrastructure.Context
                     .WithMany(m => m.MenterForProjects)
                     .HasForeignKey(e => e.MenterId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<EmailConfiguration>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ServiceName).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.EmailSubject).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.EmailBodyTemplate).IsRequired();
+            });
+
+            modelBuilder.Entity<EmailLog>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasOne(e => e.EmailConfiguration)
+                    .WithMany()
+                    .HasForeignKey(e => e.EmailConfigurationId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }
