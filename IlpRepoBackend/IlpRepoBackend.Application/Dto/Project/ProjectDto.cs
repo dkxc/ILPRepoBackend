@@ -49,14 +49,14 @@ namespace IlpRepoBackend.Application.Dto.Project
         public DateTime DueDate { get; set; }
     }
 
-    public class DocumentSubmissionDto
-    {
-        public int Id { get; set; }
-        public int? DocumentId { get; set; }
-        public int? RequestId { get; set; }
-        public string? FileName { get; set; }
-        public string? FileType { get; set; }
-        public string? SubmissionLink { get; set; }
-        public DateTime SubmissionDate { get; set; }
-    }
+    //public class DocumentSubmissionDto
+    //{
+    //    public int Id { get; set; }
+    //    public int? DocumentId { get; set; }
+    //    public int? RequestId { get; set; }
+    //    public string? FileName { get; set; }
+    //    public string? FileType { get; set; }
+    //    public string? SubmissionLink { get; set; }
+    //    public DateTime SubmissionDate { get; set; }
+    //}
 }
