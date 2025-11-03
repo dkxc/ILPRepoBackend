@@ -38,6 +38,8 @@ namespace IlpRepoBackend.Infrastructure.Context
         public DbSet<Phase> Phases { get; set; }
         public DbSet<PhaseType> PhaseTypes { get; set; }
         public DbSet<BatchType> BatchTypes { get; set; }
+        public DbSet<PocsForProject> PocsForProjects { get; set; }
+        public DbSet<MenterForAProject> MentersForProjects { get; set; }
 
         public DbSet<PocsForProject> PocsForProjects { get; set; }
         public DbSet<MenterForAProject> MentersForProjects { get; set; }
