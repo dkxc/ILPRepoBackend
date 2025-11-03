@@ -12,8 +12,10 @@ namespace IlpRepoBackend.Infrastructure.Repositories
 {
     public class DocumentRequestRepository : GenericRepository<DocumentRequest>, IDocumentRequestRepository
     {
+        private readonly AppDbContext _context;
         public DocumentRequestRepository(AppDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<IEnumerable<DocumentRequest>> GetByProjectIdAsync(int projectId)
@@ -42,19 +44,6 @@ namespace IlpRepoBackend.Infrastructure.Repositories
                 .Include(dr => dr.Project)
                 .FirstOrDefaultAsync();
         }
-    }
-}
-        private readonly AppDbContext _context;
-        public DocumentRequestRepository(AppDbContext context) : base(context)
-        {
-            _context = context;
-        }
-
-        public Task<IEnumerable<DocumentRequest>> GetByProjectIdAsync(int projectId)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<IEnumerable<DocumentRequest>> GetPendingRequestsDueByDateAsync(DateTime dueDate)
         {
             return await _context.DocumentRequests
@@ -82,3 +71,13 @@ namespace IlpRepoBackend.Infrastructure.Repositories
         }
     }
 }
+        //private readonly AppDbContext _context;
+        //public DocumentRequestRepository(AppDbContext context) : base(context)
+        //{
+        //    _context = context;
+        //}
+
+        //public Task<IEnumerable<DocumentRequest>> GetByProjectIdAsync(int projectId)
+        //{
+        //    throw new NotImplementedException();
+        //}
