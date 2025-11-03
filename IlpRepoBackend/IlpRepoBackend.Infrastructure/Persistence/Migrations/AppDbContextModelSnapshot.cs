@@ -1838,6 +1838,7 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.Navigation("TraineeDus");
                 });
 #pragma warning restore 612, 618
-        }
+        });
     }
+}
 }
