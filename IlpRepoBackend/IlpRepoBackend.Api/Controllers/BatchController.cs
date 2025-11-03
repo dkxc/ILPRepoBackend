@@ -1,4 +1,5 @@
 ﻿using IlpRepoBackend.Application.Command.Batchs;
+using IlpRepoBackend.Application.Query.Batches;
 using IlpRepoBackend.Application.Query.Batchs;
 using IlpRepoBackend.Application.Query.Users;
 using MediatR;
@@ -75,6 +76,20 @@ namespace IlpRepoBackend.Api.Controllers
         {
             var batch = await _mediator.Send(new GetBatchByIdQuery { Id = id });
             return Ok(batch);
+        }
+
+        ///// <summary>
+        ///// Get Specialization Phase Data by Batch
+        ///// </summary>
+        [HttpGet("{batchId}/specialization")]
+        public async Task<IActionResult> GetSpecializationPhase(int batchId)
+        {
+            var result = await _mediator.Send(new GetSpecializationPhaseByBatchQuery(batchId));
+            
+            if (!result.Succeeded)
+                return NotFound(result);
+
+            return Ok(result);
         }
     }
 

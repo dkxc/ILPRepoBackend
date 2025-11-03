@@ -29,6 +29,10 @@ namespace IlpRepoBackend.Infrastructure.Repositories
             _context = context;
 
         }
+<<<<<<< HEAD
+
+=======
+>>>>>>> 2f6f4cb9cf57c43d61af7d3fe5e960fc3ef49cb2
         public override async Task<IEnumerable<Trainee>> GetAllAsync()
 
         {
@@ -99,6 +103,10 @@ namespace IlpRepoBackend.Infrastructure.Repositories
  
         public async Task<bool> AadhaarIdExistsAsync(string aadhaarId)
 
+<<<<<<< HEAD
+        public async Task<IEnumerable<Trainee>> GetTraineesWithProjectsByBatchIdAsync(int batchId)
+=======
+>>>>>>> 2f6f4cb9cf57c43d61af7d3fe5e960fc3ef49cb2
         {
 
             if (string.IsNullOrWhiteSpace(aadhaarId))
@@ -118,12 +126,20 @@ namespace IlpRepoBackend.Infrastructure.Repositories
             return await _context.Trainees
 
                 .Include(t => t.User)
+<<<<<<< HEAD
+                .Include(t => t.ProjectTeams)
+                    .ThenInclude(pt => pt.Project)
+                .Where(t => t.BatchId == batchId)
+                .ToListAsync();
+=======
 
                 .Include(t => t.Batch)
 
                 .FirstOrDefaultAsync(t => t.Id == id);
 
+>>>>>>> 2f6f4cb9cf57c43d61af7d3fe5e960fc3ef49cb2
         }
+
         public async Task<Trainee?> GetByName(string name)
         {
             return await _context.Trainees
@@ -131,21 +147,12 @@ namespace IlpRepoBackend.Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.User.Username == name);
         }
 
-        // ✅ Required by interface, return same as method below
-        public async Task<object> GetTraineesByBatchId(object batchId)
-        {
-            int id = Convert.ToInt32(batchId);
-            var list = await GetTraineesByBatchId(id);
-            return list;
-        }
-
-        public async Task<List<Trainee>> GetTraineesByBatchId(int batchId)
+        public override async Task<Trainee?> GetByIdAsync(int id)
         {
             return await _context.Trainees
-                .Where(t => t.BatchId == batchId)
-                .Include(t => t.User)    // ✅ Required to get Username
-                .Include(t => t.Batch)   // ✅ Required to get BatchName
-                .ToListAsync();
+                .Include(t => t.User)
+                .Include(t => t.Batch)
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
     }
 
