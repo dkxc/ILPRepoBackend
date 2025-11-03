@@ -21,10 +21,21 @@ namespace IlpRepoBackend.Application.Handler.Trainees
             _mapper = mapper;
         }
 
-        public async Task<ApiResponse<List<TraineeDto>>> Handle(GetTraineesByBatchIdQuery request, CancellationToken cancellationToken)
+
+        //public async Task<ApiResponse<List<TraineeDto>>> Handle(GetTraineesByBatchIdQuery request, CancellationToken cancellationToken)
+        //{
+        //    var trainees = await _traineeRepository.GetByBatchIdAsync(request.BatchId);
+        //    var traineeDtos = _mapper.Map<List<TraineeDto>>(trainees);
+        //}
+        public async Task<ApiResponse<List<TraineeDto>>> Handle(
+    GetTraineesByBatchIdQuery request,
+    CancellationToken cancellationToken)
         {
-            var trainees = await _traineeRepository.GetByBatchIdAsync(request.BatchId);
+            var trainees = await _traineeRepository.GetTraineesByBatchId(request.BatchId);
+
             var traineeDtos = _mapper.Map<List<TraineeDto>>(trainees);
+
+
             return ApiResponse<List<TraineeDto>>.Success(traineeDtos);
         }
 

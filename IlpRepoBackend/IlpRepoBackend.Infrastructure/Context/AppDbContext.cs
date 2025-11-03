@@ -1,6 +1,5 @@
 ﻿using IlpRepoBackend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace IlpRepoBackend.Infrastructure.Context
 {
@@ -35,11 +34,16 @@ namespace IlpRepoBackend.Infrastructure.Context
         public DbSet<TraineeDu> TraineeDus { get; set; }
         public DbSet<FeedbackHeader> FeedbackHeaders { get; set; }
         public DbSet<FeedbackHeaderResponse> FeedbackHeaderResponses { get; set; }
+
         public DbSet<Phase> Phases { get; set; }
         public DbSet<PhaseType> PhaseTypes { get; set; }
         public DbSet<BatchType> BatchTypes { get; set; }
         public DbSet<PocsForProject> PocsForProjects { get; set; }
         public DbSet<MenterForAProject> MentersForProjects { get; set; }
+
+        public DbSet<PocsForProject> PocsForProjects { get; set; }
+        public DbSet<MenterForAProject> MentersForProjects { get; set; }
+
 
         public DbSet<EmailConfiguration> EmailConfigurations { get; set; }
         public DbSet<EmailLog> EmailLogs { get; set; }
@@ -273,6 +277,7 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
                 entity.Property(e => e.Name).HasColumnName("name").IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Link).HasColumnName("link").HasMaxLength(255);
+                entity.Property(e => e.FileType).HasColumnName("file_type").HasMaxLength(50);
                 entity.Property(e => e.UploadDate).HasColumnName("upload_date").HasDefaultValueSql("now()");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
@@ -486,7 +491,6 @@ namespace IlpRepoBackend.Infrastructure.Context
                     .HasForeignKey(e => e.BuddyId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
-
             // TraineeDu Configuration
             modelBuilder.Entity<TraineeDu>(entity =>
             {
@@ -545,6 +549,7 @@ namespace IlpRepoBackend.Infrastructure.Context
                     .OnDelete(DeleteBehavior.SetNull);
             });
 
+
             // Phase Configuration (moved from PhaseConfiguration)
             modelBuilder.Entity<Phase>(entity =>
             {
@@ -588,63 +593,64 @@ namespace IlpRepoBackend.Infrastructure.Context
                     new PhaseType { Id = 4, Name = "Business Orientation Phase", CreatedAt = new DateTime(2025, 10, 29, 13, 30, 3, DateTimeKind.Utc), UpdatedAt = new DateTime(2025, 10, 29, 13, 30, 3, DateTimeKind.Utc) },
                     new PhaseType { Id = 5, Name = "OJT Phase", CreatedAt = new DateTime(2025, 10, 29, 13, 30, 4, DateTimeKind.Utc), UpdatedAt = new DateTime(2025, 10, 29, 13, 30, 4, DateTimeKind.Utc) }
                 );
-            // PocsForProject Configuration - Already has Id
-            modelBuilder.Entity<PocsForProject>(entity =>
-            {
-                entity.ToTable("pocs_for_project");
-                entity.HasKey(e => e.Id);
+                // PocsForProject Configuration - Already has Id
+                modelBuilder.Entity<PocsForProject>(entity =>
+                {
+                    entity.ToTable("pocs_for_project");
+                    entity.HasKey(e => e.Id);
 
-                entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
-                entity.Property(e => e.PocId).HasColumnName("poc_id").IsRequired();
-                entity.Property(e => e.ProjectId).HasColumnName("project_id").IsRequired();
+                    entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+                    entity.Property(e => e.PocId).HasColumnName("poc_id").IsRequired();
+                    entity.Property(e => e.ProjectId).HasColumnName("project_id").IsRequired();
 
-                entity.HasOne(e => e.Poc)
-                    .WithMany(p => p.PocsForProjects)
-                    .HasForeignKey(e => e.PocId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    entity.HasOne(e => e.Poc)
+                        .WithMany(p => p.PocsForProjects)
+                        .HasForeignKey(e => e.PocId)
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(e => e.Project)
-                    .WithMany(p => p.PocsForProjects)
-                    .HasForeignKey(e => e.ProjectId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
+                    entity.HasOne(e => e.Project)
+                        .WithMany(p => p.PocsForProjects)
+                        .HasForeignKey(e => e.ProjectId)
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
 
-            // MenterForAProject Configuration - Already has Id
-            modelBuilder.Entity<MenterForAProject>(entity =>
-            {
-                entity.ToTable("menter_for_project");
-                entity.HasKey(e => e.Id);
+                // MenterForAProject Configuration - Already has Id
+                modelBuilder.Entity<MenterForAProject>(entity =>
+                {
+                    entity.ToTable("menter_for_project");
+                    entity.HasKey(e => e.Id);
 
-                entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
-                entity.Property(e => e.MenterId).HasColumnName("mentor_id").IsRequired();
-                entity.Property(e => e.ProjectId).HasColumnName("project_id").IsRequired();
-                entity.Property(e => e.MentorType).HasColumnName("mentor_type").HasConversion<string>().IsRequired();
+                    entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+                    entity.Property(e => e.MenterId).HasColumnName("mentor_id").IsRequired();
+                    entity.Property(e => e.ProjectId).HasColumnName("project_id").IsRequired();
+                    entity.Property(e => e.MentorType).HasColumnName("mentor_type").HasConversion<string>().IsRequired();
 
-                entity.HasOne(e => e.Project)
-                    .WithMany(p => p.MentersForProjects)
-                    .HasForeignKey(e => e.ProjectId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    entity.HasOne(e => e.Project)
+                        .WithMany(p => p.MentersForProjects)
+                        .HasForeignKey(e => e.ProjectId)
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(e => e.Mentor)
-                    .WithMany(m => m.MenterForProjects)
-                    .HasForeignKey(e => e.MenterId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-            modelBuilder.Entity<EmailConfiguration>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.ServiceName).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.EmailSubject).IsRequired().HasMaxLength(500);
-                entity.Property(e => e.EmailBodyTemplate).IsRequired();
-            });
+                    entity.HasOne(e => e.Mentor)
+                        .WithMany(m => m.MenterForProjects)
+                        .HasForeignKey(e => e.MenterId)
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+                modelBuilder.Entity<EmailConfiguration>(entity =>
+                {
+                    entity.HasKey(e => e.Id);
+                    entity.Property(e => e.ServiceName).IsRequired().HasMaxLength(100);
+                    entity.Property(e => e.EmailSubject).IsRequired().HasMaxLength(500);
+                    entity.Property(e => e.EmailBodyTemplate).IsRequired();
+                });
 
-            modelBuilder.Entity<EmailLog>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.HasOne(e => e.EmailConfiguration)
-                    .WithMany()
-                    .HasForeignKey(e => e.EmailConfigurationId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                modelBuilder.Entity<EmailLog>(entity =>
+                {
+                    entity.HasKey(e => e.Id);
+                    entity.HasOne(e => e.EmailConfiguration)
+                        .WithMany()
+                        .HasForeignKey(e => e.EmailConfigurationId)
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
             });
         }
     }

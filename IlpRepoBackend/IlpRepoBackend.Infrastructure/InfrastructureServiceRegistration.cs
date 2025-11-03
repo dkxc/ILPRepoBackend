@@ -9,22 +9,16 @@ namespace IlpRepoBackend.Infrastructure
 {
     public static class InfrastructureServiceRegistration
     {
-        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
-        {
-            // Add DbContext
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+        //public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+        //{
+        //    //// Add DbContext
+        //    //services.AddDbContext<AppDbContext>(options =>
+        //    //    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
-            // Register repositories
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IBatchRepository, BatchRepository>();
-            services.AddScoped<ITraineeRepository, TraineeRepository>();
-            services.AddScoped<ITraineeDuRepository, TraineeDuRepository>();
-            services.AddScoped<IDuRepository, DuRepository>();
-            services.AddScoped<IBoPhaseRepository, BoPhaseRepository>();
-            services.AddScoped<IBuddyRepository, BuddyRepository>();
+        //    // Register repositories
+           
 
-            return services;
-        }
+        //    return services;
+        //}
     }
 }

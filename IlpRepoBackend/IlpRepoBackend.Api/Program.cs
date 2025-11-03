@@ -4,8 +4,12 @@ using IlpRepoBackend.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+
 using System.Text.Json.Serialization;
 using System.Text;
+
+using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -95,7 +99,9 @@ builder.Services.AddAuthorization();
 
 // Register Application and Infrastructure services
 builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddPersistenceServices(builder.Configuration);
+
+//builder.Services.AddInfrastructureServices(builder.Configuration);
 
 var app = builder.Build();
 

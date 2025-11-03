@@ -19,8 +19,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IlpRepoBackend.Application\IlpRepoBackend.Application.csproj" />
-    <ProjectReference Include="..\IlpRepoBackend.Domain\IlpRepoBackend.Domain.csproj" />
+
   </ItemGroup>
+	<ItemGroup>
+		
+		<ProjectReference Include="..\IlpRepoBackend.Domain\IlpRepoBackend.Domain.csproj" />
+	</ItemGroup>
 
   <ItemGroup>
     <Folder Include="Configuration\" />

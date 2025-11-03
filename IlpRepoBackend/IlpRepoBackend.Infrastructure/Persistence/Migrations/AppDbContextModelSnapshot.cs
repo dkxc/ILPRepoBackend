@@ -358,6 +358,12 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("file_type");
+
                     b.Property<string>("Link")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
@@ -1593,7 +1599,6 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.Navigation("PhaseTypeEntity");
                 });
 
-            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Poc", b =>
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.PocsForProject", b =>
                 {
                     b.HasOne("IlpRepoBackend.Domain.Entities.Poc", "Poc")
@@ -1782,12 +1787,22 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.Navigation("ProjectLinks");
                 });
 
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Mentor", b =>
+                {
+                    b.Navigation("MenterForProjects");
+                });
+
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.PhaseType", b =>
                 {
                     b.Navigation("Phases");
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Mentor", b =>
                 {
                     b.Navigation("MenterForProjects");
+                });
+
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Poc", b =>
+                {
+                    b.Navigation("PocsForProjects");
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Poc", b =>

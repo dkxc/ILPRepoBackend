@@ -51,6 +51,13 @@ namespace IlpRepoBackend.Infrastructure
             services.AddScoped<IDocumentRequestRepository, DocumentRequestRepository>();
             services.AddScoped<IDocumentSubmissionRepository, DocumentSubmissionRepository>();
             services.AddScoped<IFileStorageService, SupabaseStorageService>();
+            //services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IBatchRepository, BatchRepository>();
+            services.AddScoped<ITraineeRepository, TraineeRepository>();
+            services.AddScoped<ITraineeDuRepository, TraineeDuRepository>();
+            services.AddScoped<IDuRepository, DuRepository>();
+            services.AddScoped<IBoPhaseRepository, BoPhaseRepository>();
+            services.AddScoped<IBuddyRepository, BuddyRepository>();
 
             return services;
         }
