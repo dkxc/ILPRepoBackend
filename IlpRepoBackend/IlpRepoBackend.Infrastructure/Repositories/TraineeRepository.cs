@@ -2,10 +2,8 @@
 using IlpRepoBackend.Domain.Persistence;
 using IlpRepoBackend.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IlpRepoBackend.Infrastructure.Repositories
@@ -13,19 +11,52 @@ namespace IlpRepoBackend.Infrastructure.Repositories
     public class TraineeRepository : GenericRepository<Trainee>, ITraineeRepository
     {
         private readonly AppDbContext _context;
+
         public TraineeRepository(AppDbContext context) : base(context)
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<Trainee>> GetByBatchIdAsync(int batchId)
+        public override async Task<IEnumerable<Trainee>> GetAllAsync()
         {
-            return await _context.Trainees.Where(t => t.BatchId == batchId).ToListAsync();
+            return await _context.Trainees
+                .Include(t => t.User)
+                .Include(t => t.Batch)
+                .ToListAsync();
         }
 
-        public Task<object> GetTraineesByBatchId(object batchId)
+        public async Task<IEnumerable<Trainee>> GetByBatchIdAsync(int batchId)
         {
-            return Task.FromResult((object)_context.Trainees.Where(t => t.BatchId == (int)batchId).ToList());
+            return await _context.Trainees
+                .Include(t => t.User)
+                .Include(t => t.Batch)
+                .Where(t => t.BatchId == batchId)
+                .ToListAsync();
+        }
+
+        public async Task<Trainee?> GetByUserIdAsync(int userId)
+        {
+            return await _context.Trainees
+                .Include(t => t.User)
+                .Include(t => t.Batch)
+                .FirstOrDefaultAsync(t => t.UserId == userId);
+        }
+
+        public async Task<bool> AadhaarIdExistsAsync(string aadhaarId)
+        {
+            if (string.IsNullOrWhiteSpace(aadhaarId))
+                return false;
+                
+            return await _context.Trainees
+                .AnyAsync(t => t.AadhaarId == aadhaarId);
+        }
+
+        public override async Task<Trainee?> GetByIdAsync(int id)
+        {
+            return await _context.Trainees
+                .Include(t => t.User)
+                .Include(t => t.Batch)
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
     }
 }

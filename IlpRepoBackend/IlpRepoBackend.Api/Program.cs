@@ -2,6 +2,7 @@ using IlpRepoBackend.Api.Middleware;
 using IlpRepoBackend.Application;
 using IlpRepoBackend.Infrastructure;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
@@ -15,13 +16,17 @@ builder.Services.AddCors(options =>
     });
 });
 // Add services to the container
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+    {
+        opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Register Application and Infrastructure services
 builder.Services.AddApplicationServices();
-builder.Services.AddPersistenceServices(builder.Configuration);
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 var app = builder.Build();
 //AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);

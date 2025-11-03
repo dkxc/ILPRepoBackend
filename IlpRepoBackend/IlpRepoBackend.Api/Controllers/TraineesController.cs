@@ -1,9 +1,9 @@
 ﻿using IlpRepoBackend.Application.Command.Trainees;
-using IlpRepoBackend.Application.Command.Users;
 using IlpRepoBackend.Application.Dto;
+using IlpRepoBackend.Application.Query.Trainees;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace IlpRepoBackend.Api.Controllers
@@ -13,52 +13,91 @@ namespace IlpRepoBackend.Api.Controllers
     public class TraineesController : ControllerBase
     {
         private readonly IMediator _mediator;
+        
         public TraineesController(IMediator mediator)
         {
             _mediator = mediator;
         }
-        //public async Task<IActionResult> Create([FromBody] CreateUserCommand command)
-        //{
-        //    var user = await _mediator.Send(command);
-        //    return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
-        //}
-        ///// <summary>
-        ///// Add New Trainee
-        ///// </summary>
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateTraineeCommand command)
         {
-            var trainee = await _mediator.Send(command);
-            return Ok(trainee);
-        }
+            var result = await _mediator.Send(command);
+            if (!result.Succeeded)
+                return BadRequest(result);
 
-        ///// <summary>
-        ///// Add All Trainee
-        ///// </summary>
+            return CreatedAtAction(nameof(GetAll), new { id = result.Data?.Id }, result);
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var trainees = await _mediator.Send(new Application.Query.Trainees.GetTraineeQuery());
-            return Ok(trainees);
-        }
+            var result = await _mediator.Send(new GetTraineeQuery());
+            if (!result.Succeeded)
+                return NotFound(result);
 
-        ///// <summary>
-        ///// Get All Trainee By Batch Id
-        ///// </summary>
+            return Ok(result);
+        }
         
         [HttpGet("batch/{batchId}")]
         public async Task<IActionResult> GetTraineesByBatchId(int batchId)
         {
-            var trainees = await _mediator.Send(new Application.Query.Trainees.GetTraineesByBatchIdQuery(batchId));
-            return Ok(trainees);
+            var result = await _mediator.Send(new GetTraineesByBatchIdQuery(batchId));
+            if (!result.Succeeded)
+                return NotFound(result);
+
+            return Ok(result);
         }
-        ///// <summary>
-        ///// Add All Trainee By Batch Id
-        ///// </summary>
+
+        /// <summary>
+        /// Get training details for a specific trainee
+        /// </summary>
+        /// <param name="traineeId">The trainee ID</param>
+        /// <returns>Training details including batch, buddy, OJT mentor, DU allocation, and location</returns>
+        [HttpGet("{traineeId}/training-details")]
+        public async Task<IActionResult> GetTrainingDetails(int traineeId)
+        {
+            var query = new GetTraineeTrainingDetailsQuery(traineeId);
+            var result = await _mediator.Send(query);
+
+            if (!result.Succeeded)
+                return NotFound(result);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Update training details for a specific trainee
+        /// </summary>
+        /// <param name="traineeId">The trainee ID</param>
+        /// <param name="command">Training details to update</param>
+        /// <returns>Updated training details</returns>
+        [HttpPut("{traineeId}/training-details")]
+        public async Task<IActionResult> UpdateTrainingDetails(int traineeId, [FromBody] UpdateTraineeTrainingDetailsCommand command)
+        {
+            command.TraineeId = traineeId;
+            var result = await _mediator.Send(command);
+
+            if (!result.Succeeded)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateTraineeCommand command)
+        {
+            command.Id = id;
+            var result = await _mediator.Send(command);
+            
+            if (!result.Succeeded)
+                return BadRequest(result);
+                
+            return Ok(result);
+        }
+
         [HttpPost("batch/{batchId}")]
-        public async Task<IActionResult> Create(
+        public async Task<IActionResult> CreateBatch(
             [FromRoute] int batchId,
             [FromBody] List<AddTraineeForABatchDto> trainees)
         {
@@ -69,19 +108,10 @@ namespace IlpRepoBackend.Api.Controllers
             };
 
             var result = await _mediator.Send(command);
-
-            if (result == null)
-            {
-                return BadRequest("Result is null");
-            }
-
             if (!result.Succeeded)
-            {
-                return BadRequest(new { message = result.Message });
-            }
+                return BadRequest(result);
 
-            return Ok(new { message = "success", data = result.Data });
+            return Ok(result);
         }
-
     }
 }

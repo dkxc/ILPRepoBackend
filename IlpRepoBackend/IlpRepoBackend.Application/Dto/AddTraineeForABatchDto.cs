@@ -22,9 +22,11 @@ namespace IlpRepoBackend.Application.Dto
         public string? HealthCondition { get; set; }
         public string? PersonalInterest { get; set; }
         public string? Address { get; set; }
+        public string? CurrentAddress { get; set; }  // New field
+        public string? ContactNumber { get; set; }   // New field
         public string? EmergencyContactName { get; set; }
         public string? EmergencyContactRelationship { get; set; }
         public string? EmergencyContactNo { get; set; }
-        public string Password { get;  set; }
+        public string Password { get; set; } = string.Empty;
     }
 }

@@ -1,9 +1,6 @@
 ﻿using IlpRepoBackend.Domain.Enum;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IlpRepoBackend.Domain.Entities
 {
@@ -20,6 +17,8 @@ namespace IlpRepoBackend.Domain.Entities
         public string? HealthCondition { get; set; }
         public string? PersonalInterest { get; set; }
         public string? Address { get; set; }
+        public string? CurrentAddress { get; set; }  // New field
+        public string? ContactNumber { get; set; }   // New field
         public string? EmergencyContactName { get; set; }
         public string? EmergencyContactRelationship { get; set; }
         public string? EmergencyContactNo { get; set; }

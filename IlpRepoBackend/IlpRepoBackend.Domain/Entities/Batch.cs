@@ -11,7 +11,9 @@ namespace IlpRepoBackend.Domain.Entities
     {
         public int Id { get; set; }
         public string BatchName { get; set; } = string.Empty;
-        public string? BatchType { get; set; }
+        // replaced string BatchType with FK to BatchType
+        public int? BatchTypeId { get; set; }
+        public BatchType? BatchType { get; set; }
         public BatchStatus Status { get; set; } = BatchStatus.NotStarted;
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
@@ -20,5 +22,6 @@ namespace IlpRepoBackend.Domain.Entities
 
         public ICollection<Trainee> Trainees { get; set; } = new List<Trainee>();
         public ICollection<TrainingSchedule> TrainingSchedules { get; set; } = new List<TrainingSchedule>();
+        public ICollection<Phase> Phases { get; set; } = new List<Phase>();
     }
 }

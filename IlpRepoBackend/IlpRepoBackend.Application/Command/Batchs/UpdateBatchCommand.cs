@@ -1,11 +1,7 @@
 ﻿using IlpRepoBackend.Application.Dto;
-using IlpRepoBackend.Domain.Enum;
 using MediatR;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IlpRepoBackend.Application.Command.Batchs
 {
@@ -13,9 +9,10 @@ namespace IlpRepoBackend.Application.Command.Batchs
     {
         public int Id { get; set; }
         public string BatchName { get; set; } = string.Empty;
-        public string? BatchType { get; set; }
-        public BatchStatus Status { get; set; } = BatchStatus.NotStarted;
+        public int? BatchTypeId { get; set; }
+        // Status is auto-calculated based on StartDate and EndDate - not provided by user
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public List<PhaseDto> Phases { get; set; } = new List<PhaseDto>();
     }
 }

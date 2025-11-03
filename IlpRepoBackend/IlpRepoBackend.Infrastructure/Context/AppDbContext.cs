@@ -1,11 +1,6 @@
 ﻿using IlpRepoBackend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IlpRepoBackend.Infrastructure.Context
 {
@@ -40,6 +35,9 @@ namespace IlpRepoBackend.Infrastructure.Context
         public DbSet<TraineeDu> TraineeDus { get; set; }
         public DbSet<FeedbackHeader> FeedbackHeaders { get; set; }
         public DbSet<FeedbackHeaderResponse> FeedbackHeaderResponses { get; set; }
+        public DbSet<Phase> Phases { get; set; }
+        public DbSet<PhaseType> PhaseTypes { get; set; }
+        public DbSet<BatchType> BatchTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,7 +48,11 @@ namespace IlpRepoBackend.Infrastructure.Context
             {
                 entity.ToTable("users");
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .UseIdentityAlwaysColumn()
+                    .HasIdentityOptions(startValue: 1)
+                    .ValueGeneratedOnAdd();
                 entity.Property(e => e.Email).HasColumnName("email").IsRequired().HasMaxLength(50);
                 entity.Property(e => e.Username).HasColumnName("username").IsRequired().HasMaxLength(50);
                 entity.Property(e => e.PasswordHash).HasColumnName("password_hash").IsRequired().HasMaxLength(255);
@@ -61,27 +63,16 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.HasIndex(e => e.Email).IsUnique();
             });
 
-            // Batch Configuration
-            modelBuilder.Entity<Batch>(entity =>
-            {
-                entity.ToTable("batches");
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
-                entity.Property(e => e.BatchName).HasColumnName("batch_name").IsRequired().HasMaxLength(100);
-                entity.Property(e => e.BatchType).HasColumnName("batch_type").HasMaxLength(50);
-                entity.Property(e => e.Status).HasColumnName("status").HasConversion<string>().IsRequired();
-                entity.Property(e => e.StartDate).HasColumnName("start_date");
-                entity.Property(e => e.EndDate).HasColumnName("end_date");
-                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
-                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
-            });
-
             // Trainee Configuration
             modelBuilder.Entity<Trainee>(entity =>
             {
                 entity.ToTable("trainees");
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .UseIdentityAlwaysColumn()
+                    .HasIdentityOptions(startValue: 1)
+                    .ValueGeneratedOnAdd();
                 entity.Property(e => e.UserId).HasColumnName("user_id").IsRequired();
                 entity.Property(e => e.Email).HasColumnName("email").HasMaxLength(255);
                 entity.Property(e => e.BatchId).HasColumnName("batch_id").IsRequired();
@@ -92,6 +83,8 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.Property(e => e.HealthCondition).HasColumnName("health_condition").HasColumnType("text");
                 entity.Property(e => e.PersonalInterest).HasColumnName("personal_interest").HasColumnType("text");
                 entity.Property(e => e.Address).HasColumnName("address").HasColumnType("text");
+                entity.Property(e => e.CurrentAddress).HasColumnName("current_address").HasColumnType("text");
+                entity.Property(e => e.ContactNumber).HasColumnName("contact_number").HasMaxLength(15);
                 entity.Property(e => e.EmergencyContactName).HasColumnName("emergency_contact_name").HasMaxLength(100);
                 entity.Property(e => e.EmergencyContactRelationship).HasColumnName("emergency_contact_relationship").HasMaxLength(50);
                 entity.Property(e => e.EmergencyContactNo).HasColumnName("emergency_contact_no").HasMaxLength(15);
@@ -110,6 +103,44 @@ namespace IlpRepoBackend.Infrastructure.Context
                     .WithMany(b => b.Trainees)
                     .HasForeignKey(e => e.BatchId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // BatchType configuration
+            modelBuilder.Entity<BatchType>(entity =>
+            {
+                entity.ToTable("batch_types");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+                entity.Property(e => e.Name).HasColumnName("name").IsRequired().HasMaxLength(255);
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
+
+                // Seed default values with fixed DateTime values to avoid non-deterministic model
+                entity.HasData(
+                    new BatchType { Id = 1, Name = "Associate Software Developer", CreatedAt = new DateTime(2025, 10, 29, 12, 56, 6, DateTimeKind.Utc).AddTicks(9037), UpdatedAt = new DateTime(2025, 10, 29, 12, 56, 6, DateTimeKind.Utc).AddTicks(9335) },
+                    new BatchType { Id = 2, Name = "SDET", CreatedAt = new DateTime(2025, 10, 29, 12, 56, 6, DateTimeKind.Utc).AddTicks(9578), UpdatedAt = new DateTime(2025, 10, 29, 12, 56, 6, DateTimeKind.Utc).AddTicks(9579) },
+                    new BatchType { Id = 3, Name = "Business Analysis", CreatedAt = new DateTime(2025, 10, 29, 12, 56, 6, DateTimeKind.Utc).AddTicks(9580), UpdatedAt = new DateTime(2025, 10, 29, 12, 56, 6, DateTimeKind.Utc).AddTicks(9580) }
+                );
+            });
+
+            // Batch Configuration
+            modelBuilder.Entity<Batch>(entity =>
+            {
+                entity.ToTable("batches");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+                entity.Property(e => e.BatchName).HasColumnName("batch_name").IsRequired().HasMaxLength(100);
+                entity.Property(e => e.BatchTypeId).HasColumnName("batch_type_id");
+                entity.Property(e => e.Status).HasColumnName("status").HasConversion<string>().IsRequired();
+                entity.Property(e => e.StartDate).HasColumnName("start_date");
+                entity.Property(e => e.EndDate).HasColumnName("end_date");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
+
+                entity.HasOne(e => e.BatchType)
+                    .WithMany(bt => bt.Batches)
+                    .HasForeignKey(e => e.BatchTypeId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             // Project Configuration
@@ -439,7 +470,7 @@ namespace IlpRepoBackend.Infrastructure.Context
                     .HasForeignKey(e => e.BuddyId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
-        modelBuilder.Entity<TraineeDu>(entity =>
+            modelBuilder.Entity<TraineeDu>(entity =>
             {
                 entity.ToTable("trainee_du");
                 entity.HasKey(e => e.Id);
@@ -494,6 +525,51 @@ namespace IlpRepoBackend.Infrastructure.Context
                     .WithMany(f => f.FeedbackHeaderResponses)
                     .HasForeignKey(e => e.FeedbackId)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // Phase Configuration (moved from PhaseConfiguration)
+            modelBuilder.Entity<Phase>(entity =>
+            {
+                entity.ToTable("phases");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+                entity.Property(e => e.PhaseType).HasColumnName("phase_type").IsRequired().HasMaxLength(50);
+                entity.Property(e => e.StartDate).HasColumnName("start_date").IsRequired();
+                entity.Property(e => e.EndDate).HasColumnName("end_date").IsRequired();
+                entity.Property(e => e.BatchId).HasColumnName("batch_id");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
+                entity.Property(e => e.PhaseTypeId).HasColumnName("phase_type_id");
+
+                entity.HasOne(e => e.Batch)
+                    .WithMany(b => b.Phases)
+                    .HasForeignKey(e => e.BatchId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.PhaseTypeEntity)
+                    .WithMany(pt => pt.Phases)
+                    .HasForeignKey(e => e.PhaseTypeId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // PhaseType configuration
+            modelBuilder.Entity<PhaseType>(entity =>
+            {
+                entity.ToTable("phase_types");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+                entity.Property(e => e.Name).HasColumnName("name").IsRequired().HasMaxLength(255);
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
+
+                // Seed default phase types (fixed DateTimes)
+                entity.HasData(
+                    new PhaseType { Id = 1, Name = "E Learning Phase", CreatedAt = new DateTime(2025, 10, 29, 13, 30, 0, DateTimeKind.Utc), UpdatedAt = new DateTime(2025, 10, 29, 13, 30, 0, DateTimeKind.Utc) },
+                    new PhaseType { Id = 2, Name = "Tech Fundamentals Phase", CreatedAt = new DateTime(2025, 10, 29, 13, 30, 1, DateTimeKind.Utc), UpdatedAt = new DateTime(2025, 10, 29, 13, 30, 1, DateTimeKind.Utc) },
+                    new PhaseType { Id = 3, Name = "Specialization Phase", CreatedAt = new DateTime(2025, 10, 29, 13, 30, 2, DateTimeKind.Utc), UpdatedAt = new DateTime(2025, 10, 29, 13, 30, 2, DateTimeKind.Utc) },
+                    new PhaseType { Id = 4, Name = "Business Orientation Phase", CreatedAt = new DateTime(2025, 10, 29, 13, 30, 3, DateTimeKind.Utc), UpdatedAt = new DateTime(2025, 10, 29, 13, 30, 3, DateTimeKind.Utc) },
+                    new PhaseType { Id = 5, Name = "OJT Phase", CreatedAt = new DateTime(2025, 10, 29, 13, 30, 4, DateTimeKind.Utc), UpdatedAt = new DateTime(2025, 10, 29, 13, 30, 4, DateTimeKind.Utc) }
+                );
             });
         }
     }

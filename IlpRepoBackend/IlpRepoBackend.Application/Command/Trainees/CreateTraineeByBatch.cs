@@ -7,7 +7,7 @@ namespace IlpRepoBackend.Application.Command.Trainees
 {
     public class CreateTraineeByBatch : IRequest<ApiResponse<List<TraineeDto>>>
     {
-        public int BatchId { get; set; } // Changed to set
+        public int BatchId { get; set; }
         public List<AddTraineeForABatchDto> Trainees { get; set; }
 
     }

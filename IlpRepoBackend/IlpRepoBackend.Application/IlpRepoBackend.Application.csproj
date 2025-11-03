@@ -25,4 +25,8 @@
     <ProjectReference Include="..\IlpRepoBackend.Domain\IlpRepoBackend.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Command\Phases\" />
+  </ItemGroup>
+
 </Project>

@@ -72,10 +72,9 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("batch_name");
 
-                    b.Property<string>("BatchType")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("batch_type");
+                    b.Property<int?>("BatchTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("batch_type_id");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -104,7 +103,64 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BatchTypeId");
+
                     b.ToTable("batches", (string)null);
+                });
+
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.BatchType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("batch_types", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2025, 10, 29, 12, 56, 6, 0, DateTimeKind.Utc).AddTicks(9037),
+                            Name = "Associate Software Developer",
+                            UpdatedAt = new DateTime(2025, 10, 29, 12, 56, 6, 0, DateTimeKind.Utc).AddTicks(9335)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2025, 10, 29, 12, 56, 6, 0, DateTimeKind.Utc).AddTicks(9578),
+                            Name = "SDET",
+                            UpdatedAt = new DateTime(2025, 10, 29, 12, 56, 6, 0, DateTimeKind.Utc).AddTicks(9579)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2025, 10, 29, 12, 56, 6, 0, DateTimeKind.Utc).AddTicks(9580),
+                            Name = "Business Analysis",
+                            UpdatedAt = new DateTime(2025, 10, 29, 12, 56, 6, 0, DateTimeKind.Utc).AddTicks(9580)
+                        });
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.BoPhase", b =>
@@ -586,6 +642,127 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.ToTable("notifications", (string)null);
                 });
 
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Phase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BatchId")
+                        .HasColumnType("integer")
+                        .HasColumnName("batch_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_date");
+
+                    b.Property<string>("PhaseType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("phase_type");
+
+                    b.Property<int?>("PhaseTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("phase_type_id");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_date");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BatchId");
+
+                    b.HasIndex("PhaseTypeId");
+
+                    b.ToTable("phases", (string)null);
+                });
+
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.PhaseType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("phase_types", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2025, 10, 29, 13, 30, 0, 0, DateTimeKind.Utc),
+                            Name = "E Learning Phase",
+                            UpdatedAt = new DateTime(2025, 10, 29, 13, 30, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2025, 10, 29, 13, 30, 1, 0, DateTimeKind.Utc),
+                            Name = "Tech Fundamentals Phase",
+                            UpdatedAt = new DateTime(2025, 10, 29, 13, 30, 1, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2025, 10, 29, 13, 30, 2, 0, DateTimeKind.Utc),
+                            Name = "Specialization Phase",
+                            UpdatedAt = new DateTime(2025, 10, 29, 13, 30, 2, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedAt = new DateTime(2025, 10, 29, 13, 30, 3, 0, DateTimeKind.Utc),
+                            Name = "Business Orientation Phase",
+                            UpdatedAt = new DateTime(2025, 10, 29, 13, 30, 3, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreatedAt = new DateTime(2025, 10, 29, 13, 30, 4, 0, DateTimeKind.Utc),
+                            Name = "OJT Phase",
+                            UpdatedAt = new DateTime(2025, 10, 29, 13, 30, 4, 0, DateTimeKind.Utc)
+                        });
+                });
+
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Poc", b =>
                 {
                     b.Property<int>("Id")
@@ -806,7 +983,8 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.HasIdentityOptions(b.Property<int>("Id"), 1L, null, null, null, null, null);
 
                     b.Property<string>("AadhaarId")
                         .HasMaxLength(20)
@@ -825,11 +1003,20 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("blood_group");
 
+                    b.Property<string>("ContactNumber")
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)")
+                        .HasColumnName("contact_number");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
+
+                    b.Property<string>("CurrentAddress")
+                        .HasColumnType("text")
+                        .HasColumnName("current_address");
 
                     b.Property<string>("Email")
                         .HasMaxLength(255)
@@ -1036,7 +1223,8 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.HasIdentityOptions(b.Property<int>("Id"), 1L, null, null, null, null, null);
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -1085,6 +1273,16 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Batch", b =>
+                {
+                    b.HasOne("IlpRepoBackend.Domain.Entities.BatchType", "BatchType")
+                        .WithMany("Batches")
+                        .HasForeignKey("BatchTypeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("BatchType");
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.BoPhase", b =>
@@ -1194,6 +1392,24 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("DocumentRequest");
+                });
+
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Phase", b =>
+                {
+                    b.HasOne("IlpRepoBackend.Domain.Entities.Batch", "Batch")
+                        .WithMany("Phases")
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("IlpRepoBackend.Domain.Entities.PhaseType", "PhaseTypeEntity")
+                        .WithMany("Phases")
+                        .HasForeignKey("PhaseTypeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Batch");
+
+                    b.Navigation("PhaseTypeEntity");
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Poc", b =>
@@ -1322,9 +1538,16 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Batch", b =>
                 {
+                    b.Navigation("Phases");
+
                     b.Navigation("Trainees");
 
                     b.Navigation("TrainingSchedules");
+                });
+
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.BatchType", b =>
+                {
+                    b.Navigation("Batches");
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Buddy", b =>
@@ -1366,6 +1589,11 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Link", b =>
                 {
                     b.Navigation("ProjectLinks");
+                });
+
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.PhaseType", b =>
+                {
+                    b.Navigation("Phases");
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Project", b =>

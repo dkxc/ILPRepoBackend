@@ -1,0 +1,320 @@
+================================================================================
+        TRAINEE TRAINING DETAILS PUT API - IMPLEMENTATION SUMMARY
+================================================================================
+
+## Overview
+Created a PUT API endpoint to update trainee training details including buddy 
+assignment, DU allocation, OJT mentor, and location.
+
+## Endpoint Details
+
+**URL**: PUT /api/Trainees/{traineeId}/training-details
+**Description**: Update training details for a specific trainee
+**Parameters**: traineeId (integer) - Trainee ID
+
+## Request Body
+
+```json
+{
+  "buddyName": "string" (optional),
+  "duName": "string" (optional),
+  "ojtMentor": "string" (optional),
+  "location": "string" (optional)
+}
+```
+
+## Example Request
+
+```
+PUT https://localhost:7224/api/Trainees/1/training-details
+Content-Type: application/json
+
+{
+  "buddyName": "Jane Smith",
+  "duName": "Digital Engineering",
+  "ojtMentor": "Mike Johnson",
+  "location": "Bangalore"
+}
+```
+
+## Example Response
+
+```json
+{
+  "status": 200,
+  "succeeded": true,
+  "message": "Request processed successfully",
+  "data": {
+    "traineeId": 1,
+    "traineeName": "john.doe",
+    "email": "john.doe@example.com",
+    "batchName": "Software Development Batch 2024",
+    "buddyName": "Jane Smith",
+    "buddyDU": "Digital Engineering",
+    "ojtMentor": "Mike Johnson",
+    "duAllocated": "Digital Engineering",
+    "location": "Bangalore"
+  }
+}
+```
+
+## Status Codes
+
+- **200 OK**: Training details updated successfully
+- **400 Bad Request**: Validation error
+- **404 Not Found**: Trainee not found
+
+## Files Created
+
+### 1. Command Class
+**File**: `IlpRepoBackend.Application\Command\Trainees\UpdateTraineeTrainingDetailsCommand.cs`
+- Contains optional fields: BuddyName, DuName, OjtMentor, Location
+- TraineeId is set from route parameter
+- Returns `ApiResponse<TraineeTrainingDetailsDto>`
+
+### 2. Handler Class
+**File**: `IlpRepoBackend.Application\Handler\Trainees\UpdateTraineeTrainingDetailsHandler.cs`
+- Validates trainee existence
+- Updates BoPhase record (buddy assignment)
+- Updates TraineeDu record (OJT mentor, DU allocation, location)
+- Creates records if they don't exist
+- Auto-creates DU and Buddy records as needed
+- Returns updated training details
+
+### 3. Controller Update
+**File**: `IlpRepoBackend.Api\Controllers\TraineesController.cs`
+- Added PUT endpoint: `PUT /api/Trainees/{traineeId}/training-details`
+- Maps traineeId from route to command
+- Returns 400 if validation fails, 200 OK if successful
+
+## Key Features
+
+### Flexible Updates
+- ? All fields are optional - update only what you need
+- ? Can update buddy assignment independently
+- ? Can update OJT/DU/location independently
+- ? Partial updates supported
+
+### Auto-Creation Logic
+- ? Creates BoPhase record if updating buddy and none exists
+- ? Creates TraineeDu record if updating OJT/DU/Location and none exists
+- ? Auto-creates DU records if they don't exist
+- ? Auto-creates Buddy records if they don't exist
+
+### Update Logic
+- ? Updates existing BoPhase if buddy assignment exists
+- ? Updates existing TraineeDu if OJT assignment exists
+- ? Updates Buddy's DU if it has changed
+- ? Maintains timestamps (UpdatedAt)
+
+## Implementation Details
+
+### Buddy Assignment Update
+1. Validates trainee exists
+2. Checks for existing BoPhase record
+3. Creates/retrieves DU if provided
+4. Creates/retrieves Buddy
+5. Creates new BoPhase or updates existing one
+6. Links buddy to trainee
+
+### OJT/DU/Location Update
+1. Checks if any OJT-related fields are provided
+2. Checks for existing TraineeDu record
+3. Creates/retrieves DU if provided
+4. Creates new TraineeDu or updates existing one
+5. Updates only provided fields
+
+### Data Retrieval
+After updates:
+1. Fetches fresh trainee data with includes
+2. Fetches updated BoPhase with buddy details
+3. Fetches updated TraineeDu with DU details
+4. Constructs comprehensive response DTO
+
+## Use Cases
+
+### 1. Assign Buddy Only
+```json
+{
+  "buddyName": "Jane Smith",
+  "duName": "Digital Engineering"
+}
+```
+
+### 2. Assign OJT Mentor Only
+```json
+{
+  "ojtMentor": "Mike Johnson",
+  "location": "Bangalore"
+}
+```
+
+### 3. Update DU Allocation
+```json
+{
+  "duName": "Cloud Services",
+  "location": "Hyderabad"
+}
+```
+
+### 4. Complete Update
+```json
+{
+  "buddyName": "Jane Smith",
+  "duName": "Digital Engineering",
+  "ojtMentor": "Mike Johnson",
+  "location": "Bangalore"
+}
+```
+
+## Validation Rules
+
+1. **Trainee Must Exist**: Returns 404 if trainee not found
+2. **Optional Fields**: No field is required - update only what's provided
+3. **Auto-Creation**: DU and Buddy are created if they don't exist
+4. **Timestamps**: UpdatedAt is automatically set
+
+## Database Operations
+
+### Tables Affected
+1. **BoPhase**: Buddy assignment for trainee
+2. **TraineeDu**: OJT mentor, DU allocation, location
+3. **Buddy**: Buddy records (created if needed)
+4. **Du**: Delivery unit records (created if needed)
+
+### Operations Performed
+- **SELECT**: Check existing records
+- **INSERT**: Create new records if none exist
+- **UPDATE**: Update existing records
+- **No DELETE**: Updates only, no deletions
+
+## Error Handling
+
+### Common Errors
+1. **Trainee Not Found**: "Trainee with ID {id} not found"
+2. **DU Creation Failed**: "Failed to create DU with name {name}"
+3. **Buddy Creation Failed**: "Failed to create Buddy with name {name}"
+4. **Database Errors**: Caught and returned in ApiResponse
+
+### Error Response Format
+```json
+{
+  "status": 400,
+  "succeeded": false,
+  "message": "Error message here",
+  "data": null
+}
+```
+
+## Testing Scenarios
+
+### 1. First-Time Assignment
+- Trainee has no BoPhase or TraineeDu
+- All records are created fresh
+- Expected: 200 OK with new assignments
+
+### 2. Update Existing Assignment
+- Trainee already has BoPhase and TraineeDu
+- Records are updated in place
+- Expected: 200 OK with updated assignments
+
+### 3. Partial Update
+- Only update buddy, leave OJT unchanged
+- Only BoPhase is updated
+- Expected: 200 OK with buddy updated, OJT unchanged
+
+### 4. Invalid Trainee
+- Trainee ID doesn't exist
+- Expected: 404 Not Found
+
+## Comparison with Individual APIs
+
+### vs. BoPhase PUT API
+- **BoPhase PUT**: Updates only buddy assignment
+- **Training Details PUT**: Can update buddy + OJT in one call
+- **Training Details PUT**: More convenient for bulk updates
+
+### vs. TraineeDu PUT API
+- **TraineeDu PUT**: Updates only OJT/DU/Location
+- **Training Details PUT**: Can update buddy + OJT in one call
+- **Training Details PUT**: Single endpoint for all training data
+
+## Benefits
+
+1. **Convenience**: Update multiple training aspects in one call
+2. **Flexibility**: All fields optional - update only what's needed
+3. **Consistency**: Single transaction for related updates
+4. **Auto-Creation**: No need to pre-create DU or Buddy records
+5. **Comprehensive Response**: Returns complete training details after update
+
+## Related Endpoints
+
+- **GET** /api/Trainees/{traineeId}/training-details - Fetch current details
+- **POST** /api/BoPhases - Create buddy assignment
+- **PUT** /api/BoPhases/{id} - Update buddy assignment
+- **POST** /api/TraineeDus - Create OJT assignment
+- **PUT** /api/TraineeDus/{id} - Update OJT assignment
+
+## Frontend Integration Example
+
+```javascript
+// Update training details
+const updateTrainingDetails = async (traineeId, updates) => {
+  try {
+    const response = await fetch(
+      `https://localhost:7224/api/Trainees/${traineeId}/training-details`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates)
+      }
+    );
+    
+    const result = await response.json();
+    
+    if (result.succeeded) {
+      console.log('Training details updated:', result.data);
+      return result.data;
+    } else {
+      console.error('Update failed:', result.message);
+      throw new Error(result.message);
+    }
+  } catch (error) {
+    console.error('Error updating training details:', error);
+    throw error;
+  }
+};
+
+// Usage examples
+// Update only buddy
+await updateTrainingDetails(1, {
+  buddyName: 'Jane Smith',
+  duName: 'Digital Engineering'
+});
+
+// Update only OJT details
+await updateTrainingDetails(1, {
+  ojtMentor: 'Mike Johnson',
+  location: 'Bangalore'
+});
+
+// Update everything
+await updateTrainingDetails(1, {
+  buddyName: 'Jane Smith',
+  duName: 'Digital Engineering',
+  ojtMentor: 'Mike Johnson',
+  location: 'Bangalore'
+});
+```
+
+## Build Status
+? Build Successful
+
+## Documentation
+? API Documentation Updated (Endpoint #24)
+
+================================================================================
+                              END OF SUMMARY
+================================================================================
