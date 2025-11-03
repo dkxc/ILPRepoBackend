@@ -4,11 +4,7 @@ using IlpRepoBackend.Application.Dto;
 using IlpRepoBackend.Domain.Entities;
 using IlpRepoBackend.Domain.Persistence;
 using MediatR;
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IlpRepoBackend.Application.Handler.Users
@@ -17,26 +13,37 @@ namespace IlpRepoBackend.Application.Handler.Users
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+        private readonly IAuthService _authService;
 
-        public CreateUserCommandHandler(IUserRepository userRepository, IMapper mapper)
+        public CreateUserCommandHandler(
+            IUserRepository userRepository,
+            IMapper mapper,
+            IAuthService authService)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _authService = authService;
         }
 
         public async Task<UserDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            // Check if username already exists
+            // Check if email already exists
             if (await _userRepository.EmailExistsAsync(request.Email))
             {
                 throw new InvalidOperationException($"Email '{request.Email}' already exists");
             }
 
+            // Check if username already exists
+            if (await _userRepository.UsernameExistsAsync(request.Username))
+            {
+                throw new InvalidOperationException($"Username '{request.Username}' already exists");
+            }
+
             var user = new User
             {
                 Username = request.Username,
-                Email =request.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                Email = request.Email,
+                PasswordHash = _authService.HashPassword(request.Password), // Use AuthService
                 Role = request.Role,
                 IsActive = request.IsActive,
                 CreatedAt = DateTime.UtcNow,

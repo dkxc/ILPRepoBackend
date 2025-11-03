@@ -4,8 +4,10 @@ using IlpRepoBackend.Application.Query.Users;
 using IlpRepoBackend.Application.Wrapper;
 using IlpRepoBackend.Domain.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace IlpRepoBackend.Api.Controllers
 {
@@ -83,5 +85,42 @@ namespace IlpRepoBackend.Api.Controllers
             var result = await _mediator.Send(new DeleteUserCommand { Id = id });
             return result ? NoContent() : NotFound();
         }
+        [HttpPut("update-password")]
+        [Authorize]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest request)
+        {
+            try
+            {
+                // Get user ID from JWT token claims in the controller
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    return Unauthorized(new { message = "User is not authenticated" });
+                }
+
+                var command = new UpdatePasswordCommand(userId, request.CurrentPassword, request.NewPassword);
+                var result = await _mediator.Send(command);
+
+                return Ok(new
+                {
+                    message = "Password updated successfully",
+                    user = result
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating password" });
+            }
+        }
+    }
+
+    public class UpdatePasswordRequest
+    {
+        public string CurrentPassword { get; set; }
+        public string NewPassword { get; set; }
     }
 }

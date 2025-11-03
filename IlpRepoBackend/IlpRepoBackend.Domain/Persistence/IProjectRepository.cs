@@ -1,13 +1,11 @@
 ﻿using IlpRepoBackend.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using IlpRepoBackend.Domain.Persistence;
 
-namespace IlpRepoBackend.Domain.Persistence
+public interface IProjectRepository : IGenericRepository<Project>
 {
-    public interface IProjectRepository : IGenericRepository<Project>
-    {
-    }
+    Task AddTeamMemberAsync(ProjectTeam projectTeam);
+    Task<IEnumerable<Project>> GetAllProjectsWithDetailsAsync(); // Fixed return type
+    Task GetByIdWithDetailsAsync(int id);
+    Task<Project?> GetProjectWithDetailsAsync(int projectId);
+    Task<IEnumerable<Project>> GetProjectsByBatchIdAsync(int batchId);
 }

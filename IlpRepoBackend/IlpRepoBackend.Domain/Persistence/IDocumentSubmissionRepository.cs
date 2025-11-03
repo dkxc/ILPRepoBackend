@@ -10,5 +10,6 @@ namespace IlpRepoBackend.Domain.Persistence
     public interface IDocumentSubmissionRepository : IGenericRepository<DocumentSubmission>
     {
         Task<IEnumerable<DocumentSubmission>> GetByRequestIdAsync(int requestId);
+        Task<IEnumerable<DocumentSubmission>> GetByProjectIdAsync(int projectId);
     }
 }

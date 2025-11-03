@@ -1,0 +1,967 @@
+================================================================================
+                     PROJECT MANAGEMENT APIs - COMPLETE SUMMARY
+================================================================================
+
+Base URL: https://localhost:7224/api/Projects
+Content-Type: application/json
+
+================================================================================
+                              OVERVIEW
+================================================================================
+
+The Project Management APIs allow you to manage trainee projects including:
+- Creating and managing projects
+- Assigning team members (trainees) with roles
+- Assigning mentors and POCs to projects
+- Managing project links (GitHub, Jira, etc.)
+- Tracking project status and progress
+- Viewing project details with team composition
+- Bulk project creation for batches
+
+================================================================================
+                          PROJECT ENTITY STRUCTURE
+================================================================================
+
+Project Properties:
+- Id: integer (Primary Key)
+- ProjectName: string (Required, max 100 characters)
+- Status: ProjectStatus enum (Required)
+- Progress: integer (0-100, default 0)
+- Technology: string (Technology stack, max 255 characters)
+- CreatedAt: DateTime (UTC, auto-managed)
+- UpdatedAt: DateTime (UTC, auto-managed)
+
+Relationships:
+- ProjectTeams: Collection of team members (trainees) with roles
+- MentersForProjects: Collection of assigned mentors
+- PocsForProjects: Collection of assigned POCs
+- ProjectLinks: Collection of project-related links
+- DocumentRequests: Collection of document requests for this project
+
+================================================================================
+                          PROJECT STATUS ENUM
+================================================================================
+
+ProjectStatus Values:
+- NotStarted: Project has not begun
+- InProgress: Project is actively being worked on
+- OnHold: Project is temporarily paused
+- Completed: Project is finished
+- Cancelled: Project has been cancelled
+
+================================================================================
+                          PROJECT ROLE ENUM
+================================================================================
+
+ProjectRole Values (for team members):
+- Trainee: Regular team member
+- TeamLead: Team leader
+- ScrumMaster: Scrum master for the project
+
+================================================================================
+                              API ENDPOINTS
+================================================================================
+
+## 1. CREATE PROJECT (POST /api/Projects)
+
+**Description**: Create a new project with team members, mentors, and POCs
+
+**Authorization**: Requires Admin role
+
+**Request Body**:
+```json
+{
+  "projectName": "E-Commerce Platform",
+  "technology": "React, Node.js, MongoDB",
+  "status": "InProgress",
+  "progress": 25,
+  "teamMemberEmails": [
+    "john.doe@example.com",
+    "jane.smith@example.com"
+  ],
+  "teamLeadEmail": "alice.johnson@example.com",
+  "scrumMasterEmail": "bob.williams@example.com",
+  "mentorIds": [1, 2],
+  "pocIds": [1]
+}
+```
+
+**Request Fields**:
+- `projectName` (required): Name of the project
+- `technology` (required): Technology stack used
+- `status` (required): ProjectStatus enum value
+- `progress` (optional): Progress percentage (0-100), default 0
+- `teamMemberEmails` (optional): Array of trainee emails for team members
+- `teamLeadEmail` (optional): Email of team lead (must be a trainee)
+- `scrumMasterEmail` (optional): Email of scrum master (must be a trainee)
+- `mentorIds` (optional): Array of mentor IDs
+- `pocIds` (optional): Array of POC IDs
+
+**Validation**:
+- All emails must exist as trainees
+- Mentor IDs must exist
+- POC IDs must exist
+- Team lead and scrum master cannot be the same person
+- Duplicate emails are automatically removed
+
+**Success Response**: 201 Created
+```json
+{
+  "status": 201,
+  "succeeded": true,
+  "message": "Project created successfully",
+  "data": {
+    "id": 1,
+    "projectName": "E-Commerce Platform",
+    "technology": "React, Node.js, MongoDB",
+    "status": "InProgress",
+    "progress": 25,
+    "teamMembers": [...],
+    "mentors": [...],
+    "pocs": [...]
+  }
+}
+```
+
+**Error Response**: 400 Bad Request
+```json
+{
+  "status": 400,
+  "succeeded": false,
+  "message": "Trainee with email john.doe@example.com not found",
+  "data": null
+}
+```
+
+---
+
+## 2. CREATE BATCH PROJECTS (POST /api/Projects/batch)
+
+**Description**: Create multiple projects for a single batch in one request
+
+**Request Body**:
+```json
+{
+  "projects": [
+    {
+      "projectName": "Project Alpha",
+      "technology": "Java, Spring Boot",
+      "status": "InProgress",
+      "progress": 0,
+      "teamMemberEmails": ["trainee1@example.com"],
+      "teamLeadEmail": "lead1@example.com",
+      "mentorIds": [1],
+      "pocIds": [1]
+    },
+    {
+      "projectName": "Project Beta",
+      "technology": "Python, Django",
+      "status": "NotStarted",
+      "progress": 0,
+      "teamMemberEmails": ["trainee2@example.com"],
+      "mentorIds": [2]
+    }
+  ]
+}
+```
+
+**Success Response**: 200 OK
+```json
+{
+  "status": 200,
+  "succeeded": true,
+  "message": "Request processed successfully",
+  "data": [
+    {
+      "id": 1,
+      "projectName": "Project Alpha",
+      ...
+    },
+    {
+      "id": 2,
+      "projectName": "Project Beta",
+      ...
+    }
+  ]
+}
+```
+
+**Notes**:
+- Creates multiple projects in a single transaction
+- If any project fails validation, the entire batch fails
+- All projects must have valid data
+
+---
+
+## 3. GET ALL PROJECTS (GET /api/Projects)
+
+**Description**: Retrieve all projects
+
+**Request**: No parameters required
+
+**Success Response**: 200 OK
+```json
+{
+  "status": 200,
+  "succeeded": true,
+  "message": "Request processed successfully",
+  "data": [
+    {
+      "id": 1,
+      "projectName": "E-Commerce Platform",
+      "technology": "React, Node.js, MongoDB",
+      "status": "InProgress",
+      "progress": 25,
+      "createdAt": "2024-11-01T10:00:00Z",
+      "updatedAt": "2024-11-02T15:30:00Z"
+    },
+    ...
+  ]
+}
+```
+
+**Notes**:
+- Returns basic project information
+- Does not include team members, mentors, or POCs
+- For detailed information, use GET by ID or GET details endpoint
+
+---
+
+## 4. GET PROJECT BY ID (GET /api/Projects/{id})
+
+**Description**: Get a single project by ID with basic information
+
+**Parameters**: 
+- `id` (integer, required): Project ID
+
+**Example Request**: GET /api/Projects/1
+
+**Success Response**: 200 OK
+```json
+{
+  "status": 200,
+  "succeeded": true,
+  "message": "Request processed successfully",
+  "data": {
+    "id": 1,
+    "projectName": "E-Commerce Platform",
+    "technology": "React, Node.js, MongoDB",
+    "status": "InProgress",
+    "progress": 25,
+    "createdAt": "2024-11-01T10:00:00Z",
+    "updatedAt": "2024-11-02T15:30:00Z"
+  }
+}
+```
+
+**Error Response**: 404 Not Found
+```json
+{
+  "status": 404,
+  "succeeded": false,
+  "message": "Project not found",
+  "data": null
+}
+```
+
+---
+
+## 5. GET PROJECT DETAILS (GET /api/Projects/{id}/details)
+
+**Description**: Get comprehensive project details including team members, links, and document submissions
+
+**Parameters**: 
+- `id` (integer, required): Project ID
+
+**Example Request**: GET /api/Projects/1/details
+
+**Success Response**: 200 OK
+```json
+{
+  "status": 200,
+  "succeeded": true,
+  "message": "Request processed successfully",
+  "data": {
+    "id": 1,
+    "projectName": "E-Commerce Platform",
+    "status": "InProgress",
+    "progress": 25,
+    "technologyStack": "React, Node.js, MongoDB",
+    "trainees": [
+      {
+        "name": "John Doe",
+        "email": "john.doe@example.com"
+      },
+      {
+        "name": "Jane Smith",
+        "email": "jane.smith@example.com"
+      }
+    ],
+    "projectLinks": [
+      {
+        "id": 1,
+        "linkId": 1,
+        "linkUrl": "https://github.com/team/ecommerce",
+        "linkTypeName": "GitHub Repository"
+      },
+      {
+        "id": 2,
+        "linkId": 2,
+        "linkUrl": "https://jira.company.com/project/ECOM",
+        "linkTypeName": "Jira Board"
+      }
+    ],
+    "documentSubmissions": [
+      {
+        "id": 1,
+        "fileName": "SRS_Document.pdf",
+        "fileType": "application/pdf",
+        "submissionLink": "https://drive.google.com/file/...",
+        "submissionDate": "2024-11-01T14:00:00Z",
+        "documentName": "Software Requirements Specification",
+        "requestDueDate": "2024-11-05T23:59:59Z"
+      }
+    ]
+  }
+}
+```
+
+**Includes**:
+- Project basic information
+- All team members (trainees) with names and emails
+- All project links with link type names
+- All document submissions with details
+
+---
+
+## 6. UPDATE PROJECT (PUT /api/Projects/{id})
+
+**Description**: Update an existing project's details, team, mentors, and POCs
+
+**Parameters**: 
+- `id` (integer, required): Project ID
+
+**Request Body**:
+```json
+{
+  "projectName": "E-Commerce Platform (Updated)",
+  "technology": "React, Node.js, PostgreSQL",
+  "status": "InProgress",
+  "progress": 50,
+  "teamMemberEmails": [
+    "john.doe@example.com",
+    "jane.smith@example.com",
+    "new.member@example.com"
+  ],
+  "teamLeadEmail": "alice.johnson@example.com",
+  "scrumMasterEmail": "bob.williams@example.com",
+  "mentorIds": [1, 2, 3],
+  "pocIds": [1, 2]
+}
+```
+
+**Success Response**: 200 OK
+```json
+{
+  "message": "Project updated successfully",
+  "data": {
+    "id": 1,
+    "projectName": "E-Commerce Platform (Updated)",
+    "technology": "React, Node.js, PostgreSQL",
+    "status": "InProgress",
+    "progress": 50,
+    ...
+  }
+}
+```
+
+**Notes**:
+- Completely replaces existing team members, mentors, and POCs
+- All validation rules from CREATE apply
+- Previous team members, mentors, and POCs are removed
+
+---
+
+## 7. UPDATE PROJECT TECHNOLOGY (PUT /api/Projects/{id}/technology)
+
+**Description**: Update only the technology stack of a project
+
+**Parameters**: 
+- `id` (integer, required): Project ID
+
+**Request Body**:
+```json
+{
+  "technology": "Vue.js, Express, MySQL"
+}
+```
+
+**Success Response**: 200 OK
+```json
+{
+  "status": 200,
+  "succeeded": true,
+  "message": "Request processed successfully",
+  "data": true
+}
+```
+
+**Notes**:
+- Lightweight update for technology stack only
+- Does not affect team members, mentors, or POCs
+- Returns boolean indicating success
+
+---
+
+## 8. UPSERT PROJECT LINK (PUT /api/Projects/{id}/links)
+
+**Description**: Add a new project link or update an existing one based on link type
+
+**Parameters**: 
+- `id` (integer, required): Project ID
+
+**Request Body**:
+```json
+{
+  "linkId": 1,
+  "linkUrl": "https://github.com/team/ecommerce-v2"
+}
+```
+
+**Request Fields**:
+- `linkId` (required): Link type ID (references Link entity)
+- `linkUrl` (required): URL for the link
+
+**Behavior**:
+- If a project link with the same `linkId` exists, it updates the URL
+- If no link exists for that `linkId`, it creates a new one
+
+**Success Response**: 200 OK
+```json
+{
+  "status": 200,
+  "succeeded": true,
+  "message": "Request processed successfully",
+  "data": true
+}
+```
+
+**Example Link Types**:
+- 1: GitHub Repository
+- 2: Jira Board
+- 3: Confluence Wiki
+- 4: Deployment URL
+- (Link types are defined in the Link entity)
+
+---
+
+## 9. DELETE PROJECT (DELETE /api/Projects/{id})
+
+**Description**: Delete a project and all related data
+
+**Parameters**: 
+- `id` (integer, required): Project ID
+
+**Example Request**: DELETE /api/Projects/1
+
+**Success Response**: 200 OK
+```json
+{
+  "message": "Project deleted successfully"
+}
+```
+
+**Error Response**: 400 Bad Request
+```json
+{
+  "message": "Project not found or cannot be deleted"
+}
+```
+
+**Cascade Delete**:
+When a project is deleted, the following are also deleted:
+- All project team assignments (ProjectTeam records)
+- All mentor assignments (MenterForAProject records)
+- All POC assignments (PocsForProject records)
+- All project links (ProjectLink records)
+- Related document submissions and requests (if configured)
+
+**Notes**:
+- This is a permanent delete operation
+- Use with caution in production
+
+================================================================================
+                          DATA TRANSFER OBJECTS (DTOs)
+================================================================================
+
+### CreateProjectDto
+```csharp
+{
+  "projectName": "string",
+  "technology": "string",
+  "status": "NotStarted|InProgress|OnHold|Completed|Cancelled",
+  "progress": 0-100,
+  "teamMemberEmails": ["string"],
+  "teamLeadEmail": "string",
+  "scrumMasterEmail": "string",
+  "mentorIds": [integer],
+  "pocIds": [integer]
+}
+```
+
+### ProjectDto (Basic)
+```csharp
+{
+  "id": integer,
+  "projectName": "string",
+  "technology": "string",
+  "status": "string",
+  "progress": integer,
+  "createdAt": "DateTime",
+  "updatedAt": "DateTime"
+}
+```
+
+### ProjectDetailsDto (Comprehensive)
+```csharp
+{
+  "id": integer,
+  "projectName": "string",
+  "status": "string",
+  "progress": integer,
+  "technologyStack": "string",
+  "trainees": [TraineeInfoDto],
+  "projectLinks": [ProjectLinkDetailDto],
+  "documentSubmissions": [DocumentSubmissionDto]
+}
+```
+
+### TraineeInfoDto
+```csharp
+{
+  "name": "string",
+  "email": "string"
+}
+```
+
+### ProjectLinkDetailDto
+```csharp
+{
+  "id": integer,
+  "linkId": integer,
+  "linkUrl": "string",
+  "linkTypeName": "string"
+}
+```
+
+### DocumentSubmissionDto
+```csharp
+{
+  "id": integer,
+  "fileName": "string",
+  "fileType": "string",
+  "submissionLink": "string",
+  "submissionDate": "DateTime",
+  "documentName": "string",
+  "requestDueDate": "DateTime"
+}
+```
+
+================================================================================
+                          VALIDATION RULES
+================================================================================
+
+Project Name:
+- Required
+- Maximum 100 characters
+- Must be unique (recommended but not enforced)
+
+Technology:
+- Required
+- Maximum 255 characters
+
+Status:
+- Required
+- Must be valid ProjectStatus enum value
+
+Progress:
+- Optional (default 0)
+- Range: 0-100
+- Integer value representing percentage
+
+Team Member Emails:
+- Optional (can be empty array)
+- Each email must exist as a trainee
+- Duplicates are automatically removed
+- Same email cannot be team member AND team lead/scrum master
+
+Team Lead Email:
+- Optional
+- Must exist as a trainee
+- Cannot be the same as scrum master
+- Can be in team member list (will be removed from team members)
+
+Scrum Master Email:
+- Optional
+- Must exist as a trainee
+- Cannot be the same as team lead
+- Can be in team member list (will be removed from team members)
+
+Mentor IDs:
+- Optional (can be empty array)
+- Each ID must exist in Mentors table
+- Duplicates are automatically removed
+
+POC IDs:
+- Optional (can be empty array)
+- Each ID must exist in POCs table
+- Duplicates are automatically removed
+
+================================================================================
+                          ERROR HANDLING
+================================================================================
+
+Common Error Messages:
+
+**Trainee Not Found**:
+```json
+{
+  "message": "Trainee with email john.doe@example.com not found"
+}
+```
+
+**Mentor Not Found**:
+```json
+{
+  "message": "Mentor with ID 5 not found"
+}
+```
+
+**POC Not Found**:
+```json
+{
+  "message": "POC with ID 3 not found"
+}
+```
+
+**Duplicate Role Assignment**:
+```json
+{
+  "message": "Team lead and scrum master cannot be the same person"
+}
+```
+
+**Project Not Found**:
+```json
+{
+  "message": "Project not found"
+}
+```
+
+**Validation Errors**:
+```json
+{
+  "message": "Validation failed",
+  "errors": {
+    "ProjectName": ["Project name is required"],
+    "Status": ["Invalid status value"]
+  }
+}
+```
+
+================================================================================
+                          BUSINESS LOGIC
+================================================================================
+
+### Team Member Assignment Logic:
+
+1. **Validation Phase**:
+   - All emails are validated to ensure trainees exist
+   - Team lead email is validated separately
+   - Scrum master email is validated separately
+   - Mentors and POCs are validated by ID
+
+2. **Role Conflict Resolution**:
+   - If team lead is in team member list, they are removed from team members
+   - If scrum master is in team member list, they are removed from team members
+   - This ensures no duplicate assignments
+
+3. **Role Assignment Order**:
+   - Team members are added first with Role = Trainee
+   - Team lead is added with Role = TeamLead
+   - Scrum master is added with Role = ScrumMaster
+
+### Update Logic:
+
+When updating a project:
+1. Previous team members are completely removed
+2. Previous mentors are completely removed
+3. Previous POCs are completely removed
+4. New assignments are created from scratch
+5. This ensures clean state without orphaned records
+
+### Link Management:
+
+Project links use an "upsert" pattern:
+- If a link with the same `linkId` (link type) exists ? UPDATE
+- If no link exists for that `linkId` ? CREATE
+- This ensures only one link per link type per project
+
+================================================================================
+                          RELATED ENTITIES
+================================================================================
+
+### Project Team (ProjectTeam)
+```csharp
+{
+  "id": integer,
+  "projectId": integer,
+  "traineeId": integer,
+  "role": "Trainee|TeamLead|ScrumMaster",
+  "createdAt": "DateTime",
+  "updatedAt": "DateTime"
+}
+```
+
+### Mentor for Project (MenterForAProject)
+```csharp
+{
+  "id": integer,
+  "menterId": integer,
+  "projectId": integer,
+  "mentorType": "string"
+}
+```
+
+### POC for Project (PocsForProject)
+```csharp
+{
+  "id": integer,
+  "pocId": integer,
+  "projectId": integer"
+}
+```
+
+### Project Link (ProjectLink)
+```csharp
+{
+  "id": integer,
+  "projectId": integer,
+  "linkId": integer,
+  "linkUrl": "string",
+  "createdAt": "DateTime",
+  "updatedAt": "DateTime"
+}
+```
+
+================================================================================
+                          DATABASE RELATIONSHIPS
+================================================================================
+
+Project has:
+- Many ProjectTeams (trainees assigned to project)
+- Many MentersForProjects (mentors assigned to project)
+- Many PocsForProjects (POCs assigned to project)
+- Many ProjectLinks (links associated with project)
+- Many DocumentRequests (document requests for project)
+
+Trainee can have:
+- Many ProjectTeams (can be in multiple projects)
+
+Mentor can have:
+- Many MentersForProjects (can mentor multiple projects)
+
+POC can have:
+- Many PocsForProjects (can be POC for multiple projects)
+
+Link can have:
+- Many ProjectLinks (can be used in multiple projects)
+
+================================================================================
+                          BEST PRACTICES
+================================================================================
+
+1. **Creating Projects**:
+   - Always include project name and technology
+   - Set appropriate status (usually "NotStarted" or "InProgress")
+   - Assign team members before project start
+   - Assign mentors for guidance
+
+2. **Updating Projects**:
+   - Use full update (PUT /projects/{id}) for major changes
+   - Use technology update (PUT /projects/{id}/technology) for tech stack only
+   - Use link upsert (PUT /projects/{id}/links) for managing links
+
+3. **Querying Projects**:
+   - Use GET /projects for listing all projects
+   - Use GET /projects/{id}/details for comprehensive view
+   - Details endpoint includes team, links, and submissions
+
+4. **Deleting Projects**:
+   - Confirm deletion before calling API
+   - Be aware of cascade deletes
+   - Consider archiving instead of deleting in production
+
+5. **Team Management**:
+   - Assign team lead for leadership
+   - Assign scrum master for agile practices
+   - Regular team members have "Trainee" role
+
+================================================================================
+                          FRONTEND INTEGRATION
+================================================================================
+
+### Example: Create Project Form
+
+```typescript
+const createProject = async (formData) => {
+  const projectData = {
+    projectName: formData.projectName,
+    technology: formData.technology,
+    status: formData.status || 'NotStarted',
+    progress: formData.progress || 0,
+    teamMemberEmails: formData.teamMembers.map(m => m.email),
+    teamLeadEmail: formData.teamLead?.email,
+    scrumMasterEmail: formData.scrumMaster?.email,
+    mentorIds: formData.mentors.map(m => m.id),
+    pocIds: formData.pocs.map(p => p.id)
+  };
+
+  const response = await fetch('/api/Projects', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(projectData)
+  });
+
+  return response.json();
+};
+```
+
+### Example: Get Project Details
+
+```typescript
+const getProjectDetails = async (projectId) => {
+  const response = await fetch(`/api/Projects/${projectId}/details`);
+  const data = await response.json();
+  
+  if (data.succeeded) {
+    console.log('Project:', data.data.projectName);
+    console.log('Team:', data.data.trainees);
+    console.log('Links:', data.data.projectLinks);
+  }
+};
+```
+
+### Example: Update Project Technology
+
+```typescript
+const updateTechnology = async (projectId, newTech) => {
+  const response = await fetch(`/api/Projects/${projectId}/technology`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ technology: newTech })
+  });
+
+  return response.json();
+};
+```
+
+================================================================================
+                          TESTING SCENARIOS
+================================================================================
+
+### Test Case 1: Create Simple Project
+```bash
+POST /api/Projects
+{
+  "projectName": "Test Project",
+  "technology": "JavaScript",
+  "status": "NotStarted",
+  "progress": 0
+}
+```
+Expected: 201 Created with project data
+
+### Test Case 2: Create Project with Team
+```bash
+POST /api/Projects
+{
+  "projectName": "Team Project",
+  "technology": "React",
+  "status": "InProgress",
+  "teamMemberEmails": ["member1@test.com", "member2@test.com"],
+  "teamLeadEmail": "lead@test.com"
+}
+```
+Expected: 201 Created with team assignments
+
+### Test Case 3: Get Project Details
+```bash
+GET /api/Projects/1/details
+```
+Expected: 200 OK with full project details
+
+### Test Case 4: Update Technology
+```bash
+PUT /api/Projects/1/technology
+{
+  "technology": "Vue.js, Node.js"
+}
+```
+Expected: 200 OK
+
+### Test Case 5: Delete Project
+```bash
+DELETE /api/Projects/1
+```
+Expected: 200 OK with success message
+
+================================================================================
+                          AUTHORIZATION & SECURITY
+================================================================================
+
+Current Authorization:
+- POST /api/Projects: Requires Admin role
+- POST /api/Projects/batch: Currently commented out (public)
+- All other endpoints: Public (no authorization required)
+
+Recommended Authorization:
+- GET endpoints: Trainee, Mentor, Admin
+- POST endpoints: Admin only
+- PUT endpoints: Admin, Project Team Lead
+- DELETE endpoints: Admin only
+
+================================================================================
+                          SUMMARY
+================================================================================
+
+The Project Management APIs provide comprehensive functionality for:
+? Creating and managing trainee projects
+? Assigning team members with specific roles
+? Linking mentors and POCs to projects
+? Managing project links (GitHub, Jira, etc.)
+? Tracking project status and progress
+? Viewing detailed project information
+? Bulk project creation for batches
+
+Key Features:
+- Clean Architecture with CQRS pattern
+- Automatic validation of team members, mentors, and POCs
+- Intelligent role conflict resolution
+- Comprehensive project details endpoint
+- Cascade delete for clean data management
+- Flexible update patterns (full update, partial update, upsert)
+
+================================================================================
+                              END OF DOCUMENTATION
+================================================================================
+
+Total Endpoints: 9
+- Create: 2 (single, batch)
+- Read: 3 (all, by ID, details)
+- Update: 3 (full update, technology, links)
+- Delete: 1
+
+Last Updated: 2024-11-02
+API Version: 1.0
+Maintained for ILP Repository Backend - Project Management Module

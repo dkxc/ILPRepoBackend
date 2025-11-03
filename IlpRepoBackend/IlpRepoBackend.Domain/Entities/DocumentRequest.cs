@@ -11,6 +11,7 @@ namespace IlpRepoBackend.Domain.Entities
         public int Id { get; set; }
         public int? ProjectId { get; set; }
         public int? DocumentId { get; set; }
+       
         public DateTime RequestDate { get; set; }
         public DateTime DueDate { get; set; }
         public DateTime CreatedAt { get; set; }

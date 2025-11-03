@@ -1,4 +1,5 @@
 ﻿using IlpRepoBackend.Application.Constents;
+using IlpRepoBackend.Application.Dto;
 using System;
 
 namespace IlpRepoBackend.Application.Wrapper
@@ -15,7 +16,17 @@ namespace IlpRepoBackend.Application.Wrapper
             Status = statusCode;
             Data = data;
             Message = message;
+
             Succeeded = succeeded;
+
+            Succeeded = statusCode >= 200 && statusCode < 300; // Set Succeeded based on status code
+        }
+
+        public ApiResponse(TraineeDto res, string v)
+        {
+            //this.res = res;
+            //this.v = v;
+
         }
 
         // Helper methods
