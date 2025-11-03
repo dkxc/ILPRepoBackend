@@ -5,6 +5,7 @@ using IlpRepoBackend.Application.Wrapper;
 using IlpRepoBackend.Domain.Persistence;
 using MediatR;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,11 +14,16 @@ namespace IlpRepoBackend.Application.Handler.Projects
     public class GetProjectByIdHandler : IRequestHandler<GetProjectByIdQuery, ApiResponse<ProjectDto>>
     {
         private readonly IProjectRepository _projectRepository;
+        private readonly IBatchRepository _batchRepository;
         private readonly IMapper _mapper;
 
-        public GetProjectByIdHandler(IProjectRepository projectRepository, IMapper mapper)
+        public GetProjectByIdHandler(
+            IProjectRepository projectRepository,
+            IBatchRepository batchRepository,
+            IMapper mapper)
         {
             _projectRepository = projectRepository;
+            _batchRepository = batchRepository;
             _mapper = mapper;
         }
 
@@ -33,6 +39,18 @@ namespace IlpRepoBackend.Application.Handler.Projects
                 }
 
                 var projectDto = _mapper.Map<ProjectDto>(project);
+
+                // Get batch information from the project's team members
+                var firstTeam = project.ProjectTeams?.FirstOrDefault();
+                if (firstTeam?.Trainee?.BatchId != null)
+                {
+                    var batch = await _batchRepository.GetByIdAsync(firstTeam.Trainee.BatchId);
+                    if (batch != null)
+                    {
+                        projectDto.BatchId = batch.Id;
+                        projectDto.BatchName = batch.BatchName ?? string.Empty;
+                    }
+                }
 
                 return ApiResponse<ProjectDto>.Success(projectDto, "Project retrieved successfully");
             }

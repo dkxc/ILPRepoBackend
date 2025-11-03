@@ -19,21 +19,37 @@ namespace IlpRepoBackend.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Trainee>> GetByBatchIdAsync(int batchId)
+        public async Task<List<Trainee>> GetByBatchIdAsync(int batchId)
         {
-            return await _context.Trainees.Where(t => t.BatchId == batchId).ToListAsync();
+            return await _context.Trainees
+                .Where(t => t.BatchId == batchId)
+                .Include(t => t.User)
+                .Include(t => t.Batch)
+                .ToListAsync();
         }
 
-        public Task<Trainee?> GetByName(string name)
+        public async Task<Trainee?> GetByName(string name)
         {
-            return _context.Trainees
+            return await _context.Trainees
                 .Include(t => t.User)
                 .FirstOrDefaultAsync(t => t.User.Username == name);
         }
 
-        public Task<object> GetTraineesByBatchId(object batchId)
+        // ✅ Required by interface, return same as method below
+        public async Task<object> GetTraineesByBatchId(object batchId)
         {
-            return Task.FromResult((object)_context.Trainees.Where(t => t.BatchId == (int)batchId).ToList());
+            int id = Convert.ToInt32(batchId);
+            var list = await GetTraineesByBatchId(id);
+            return list;
+        }
+
+        public async Task<List<Trainee>> GetTraineesByBatchId(int batchId)
+        {
+            return await _context.Trainees
+                .Where(t => t.BatchId == batchId)
+                .Include(t => t.User)    // ✅ Required to get Username
+                .Include(t => t.Batch)   // ✅ Required to get BatchName
+                .ToListAsync();
         }
     }
 }

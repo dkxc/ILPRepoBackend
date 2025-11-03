@@ -64,11 +64,12 @@ namespace IlpRepoBackend.API.Controllers
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<List<ProjectDto>>>> GetAll(
-            [FromQuery] int? batchId = null,
-            [FromQuery] string? status = null,
-            [FromQuery] string? technology = null)
+            //[FromQuery] int? batchId = null,
+            //[FromQuery] string? status = null,
+            //[FromQuery] string? technology = null
+            )
         {
-            var query = new GetAllProjectsQuery(batchId, status, technology);
+            var query = new GetAllProjectsQuery();
             var result = await _mediator.Send(query);
 
             if (result.Succeeded)

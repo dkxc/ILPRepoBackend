@@ -77,7 +77,7 @@ namespace IlpRepoBackend.Application.Handler.Projects
 
                 try
                 {
-                    var projectDto = await CreateSingleProject(projectInfo, dto.BatchId, batchTrainees, projectNumber);
+                    var projectDto = await CreateSingleProject(projectInfo, dto.BatchId, batch.BatchName, batchTrainees, projectNumber);
 
                     if (projectDto != null)
                     {
@@ -119,6 +119,7 @@ namespace IlpRepoBackend.Application.Handler.Projects
         private async Task<ProjectDto?> CreateSingleProject(
             ProjectCreateInfo projectInfo,
             int batchId,
+            string batchName,
             List<Trainee> batchTrainees,
             int projectNumber)
         {
@@ -268,9 +269,17 @@ namespace IlpRepoBackend.Application.Handler.Projects
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 });
+
+                // ✅ UPDATE USER ROLE TO TEAMLEAD
+                if (teamLead.User != null && teamLead.User.Role == UserRole.Trainee)
+                {
+                    teamLead.User.Role = UserRole.TeamLead;
+                    teamLead.User.UpdatedAt = DateTime.UtcNow;
+                    await _userRepository.UpdateAsync(teamLead.User);
+                }
             }
 
-            // Add Scrum Master
+            // Add Scrum Master (NO role change - stays Trainee)
             if (scrumMaster != null)
             {
                 await _projecTeamRepository.AddAsync(new ProjectTeam
@@ -308,7 +317,39 @@ namespace IlpRepoBackend.Application.Handler.Projects
                 });
             }
 
-            // Create DTO immediately after creation
+            // ✅ Fetch mentors and POCs properly (avoid .Result antipattern)
+            var mentorDtos = new List<MentorDto>();
+            foreach (var mentorId in mentorIds.Distinct())
+            {
+                var m = await _mentorRepository.GetByIdAsync(mentorId);
+                if (m != null)
+                {
+                    mentorDtos.Add(new MentorDto
+                    {
+                        Id = m.Id,
+                        Name = m.Name,
+                        Email = m.Email,
+                        MentorType = m.MentorType
+                    });
+                }
+            }
+
+            var pocDtos = new List<PocDto>();
+            foreach (var pocId in pocIds.Distinct())
+            {
+                var p = await _pocRepository.GetByIdAsync(pocId);
+                if (p != null)
+                {
+                    pocDtos.Add(new PocDto
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Email = p.Email
+                    });
+                }
+            }
+
+            // Create DTO with proper mapping
             var projectDto = new ProjectDto
             {
                 Id = createdProject.Id,
@@ -316,32 +357,17 @@ namespace IlpRepoBackend.Application.Handler.Projects
                 Technology = createdProject.Technology,
                 Status = createdProject.Status,
                 Progress = createdProject.Progress,
+                BatchId = batchId,
+                BatchName = batchName ?? string.Empty,
                 TeamMembers = teamMemberTrainees.Select(t => t.User?.Username ?? "Unknown").ToList(),
-
                 TeamLead = teamLead?.User?.Username,
                 ScrumMaster = scrumMaster?.User?.Username,
-                Mentors = mentorIds.Distinct().Select(async id =>
-                {
-                    var m = await _mentorRepository.GetByIdAsync(id);
-                    return m;
-                }).Select(t => t.Result).ToList(),
-                //MentorNames = mentorIds.Distinct().Select(async id =>
-                //{
-                //    var m = await _mentorRepository.GetByIdAsync(id);
-                //    return m?.Name ?? "Unknown";
-                //}).Select(t => t.Result).ToList(),
-                Pocs = pocIds.Distinct().Select(async id =>
-                {
-                    var p = await _pocRepository.GetByIdAsync(id);
-                    return p;
-                }).Select(t => t.Result).ToList(),
-                //PocNames = pocIds.Distinct().Select(async id =>
-                //{
-                //    var p = await _pocRepository.GetByIdAsync(id);
-                //    return p?.Name ?? "Unknown";
-                //}).Select(t => t.Result).ToList()
+                Mentors = mentorDtos,
+                Pocs = pocDtos,
+                DocumentRequests = new List<DocumentRequestDto>(),
+                DocumentSubmissions = new List<DocumentSubmissionDto>(),
                 CreatedAt = createdProject.CreatedAt,
-                UpdatedAt=createdProject.UpdatedAt,
+                UpdatedAt = createdProject.UpdatedAt
             };
 
             return projectDto;
