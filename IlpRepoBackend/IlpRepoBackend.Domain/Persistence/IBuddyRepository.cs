@@ -10,5 +10,6 @@ namespace IlpRepoBackend.Domain.Persistence
     public interface IBuddyRepository : IGenericRepository<Buddy>
     {
         Task<IEnumerable<Buddy>> GetByDuIdAsync(int duId);
+        Task<Buddy?> GetByNameAsync(string buddyName);
     }
 }

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using BCrypt.Net;
 using IlpRepoBackend.Application.Command.Trainees;
 using IlpRepoBackend.Application.Dto;
 using IlpRepoBackend.Application.Wrapper;
 using IlpRepoBackend.Domain.Entities;
+using IlpRepoBackend.Domain.Enum;
 using IlpRepoBackend.Domain.Persistence;
 using MediatR;
 using System;
@@ -13,111 +15,112 @@ using System.Threading.Tasks;
 
 namespace IlpRepoBackend.Application.Handler.Trainees
 {
-    public class CreateTraineeByBatchHandler
-        : IRequestHandler<CreateTraineeByBatch, ApiResponse<List<TraineeDto>>>
+    public class CreateTraineeByBatchHandler : IRequestHandler<CreateTraineeByBatch, ApiResponse<List<TraineeDto>>>
     {
-        private readonly ITraineeRepository _traineeRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IBatchRepository _batchRepository;
         private readonly IMapper _mapper;
+        private readonly IUserRepository _userRepository;
+        private readonly ITraineeRepository _traineeRepository;
+        private readonly IBatchRepository _batchRepository;
 
         public CreateTraineeByBatchHandler(
-            ITraineeRepository traineeRepository,
+            IMapper mapper,
             IUserRepository userRepository,
-            IBatchRepository batchRepository,
-            IMapper mapper)
+            ITraineeRepository traineeRepository,
+            IBatchRepository batchRepository)
         {
-            _traineeRepository = traineeRepository;
-            _userRepository = userRepository;
-            _batchRepository = batchRepository;
             _mapper = mapper;
+            _userRepository = userRepository;
+            _traineeRepository = traineeRepository;
+            _batchRepository = batchRepository;
         }
 
-        public async Task<ApiResponse<List<TraineeDto>>> Handle(
-            CreateTraineeByBatch request,
-            CancellationToken cancellationToken)
+        public async Task<ApiResponse<List<TraineeDto>>> Handle(CreateTraineeByBatch request, CancellationToken cancellationToken)
         {
-            // Validate input
-            if (request.Trainees == null || request.Trainees.Count == 0)
+            if (request?.Trainees == null || !request.Trainees.Any())
+            {
                 return ApiResponse<List<TraineeDto>>.Fail("No trainees to add");
+            }
 
             // Validate batch exists
             var batch = await _batchRepository.GetByIdAsync(request.BatchId);
             if (batch == null)
+            {
                 return ApiResponse<List<TraineeDto>>.Fail("Batch does not exist");
-
-            // Validate all emails upfront
-            var emails = request.Trainees.Select(t => t.Email).Where(e => !string.IsNullOrEmpty(e)).ToList();
-            foreach (var email in emails)
-            {
-                if (await _userRepository.EmailExistsAsync(email))
-                    return ApiResponse<List<TraineeDto>>.Fail($"Email {email} already exists");
             }
 
-            // Check for duplicate emails in the request itself
-            var duplicateEmails = emails.GroupBy(e => e).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
-            if (duplicateEmails.Any())
-                return ApiResponse<List<TraineeDto>>.Fail($"Duplicate emails in request: {string.Join(", ", duplicateEmails)}");
+            var createdTraineeDtos = new List<TraineeDto>();
 
-            // Validate passwords
-            foreach (var traineeDto in request.Trainees)
-            {
-                if (string.IsNullOrWhiteSpace(traineeDto.Password))
-                    return ApiResponse<List<TraineeDto>>.Fail($"Password is required for {traineeDto.Username}");
-
-                if (traineeDto.Password.Length < 6)
-                    return ApiResponse<List<TraineeDto>>.Fail($"Password must be at least 6 characters for {traineeDto.Username}");
-            }
-
-            var createdTrainees = new List<Trainee>();
-
-            // TODO: Wrap this in a database transaction for atomicity
-            // using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
             try
             {
                 foreach (var traineeDto in request.Trainees)
                 {
-                    // Create user
+                    // Check if email already exists
+                    var emailExists = await _userRepository.EmailExistsAsync(traineeDto.Email);
+                    if (emailExists)
+                    {
+                        return ApiResponse<List<TraineeDto>>.Fail($"Email {traineeDto.Email} already exists");
+                    }
+
+                    // Check if AadhaarId already exists
+                    if (!string.IsNullOrEmpty(traineeDto.AadhaarId))
+                    {
+                        var aadhaarExists = await _traineeRepository.AadhaarIdExistsAsync(traineeDto.AadhaarId);
+                        if (aadhaarExists)
+                        {
+                            return ApiResponse<List<TraineeDto>>.Fail($"Aadhaar ID {traineeDto.AadhaarId} already exists");
+                        }
+                    }
+
+                    // Create User
                     var user = new User
                     {
                         Username = traineeDto.Username,
-                        Email = traineeDto.Email,
+                        Email = traineeDto.Email ?? string.Empty,
                         PasswordHash = BCrypt.Net.BCrypt.HashPassword(traineeDto.Password),
-                        Role = Domain.Enum.UserRole.Trainee,
+                        Role = UserRole.Trainee,
                         IsActive = true,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     };
 
                     var createdUser = await _userRepository.AddAsync(user);
-                    if (createdUser == null)
-                        return ApiResponse<List<TraineeDto>>.Fail($"Failed to create user {traineeDto.Username}");
 
-                    // Create trainee
-                    var trainee = _mapper.Map<Trainee>(traineeDto);
-                    trainee.UserId = createdUser.Id;
-                    trainee.BatchId = request.BatchId;
-                    trainee.CreatedAt = DateTime.UtcNow;
-                    trainee.UpdatedAt = DateTime.UtcNow;
+                    // Create Trainee
+                    var trainee = new Trainee
+                    {
+                        UserId = createdUser.Id,
+                        Email = traineeDto.Email,
+                        BatchId = request.BatchId,
+                        PhoneNo = traineeDto.PhoneNo,
+                        Status = traineeDto.Status,
+                        BloodGroup = traineeDto.BloodGroup,
+                        AadhaarId = traineeDto.AadhaarId,
+                        HealthCondition = traineeDto.HealthCondition,
+                        PersonalInterest = traineeDto.PersonalInterest,
+                        Address = traineeDto.Address,
+                        CurrentAddress = traineeDto.CurrentAddress,
+                        ContactNumber = traineeDto.ContactNumber,
+                        EmergencyContactName = traineeDto.EmergencyContactName,
+                        EmergencyContactRelationship = traineeDto.EmergencyContactRelationship,
+                        EmergencyContactNo = traineeDto.EmergencyContactNo,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
 
                     var createdTrainee = await _traineeRepository.AddAsync(trainee);
-                    if (createdTrainee == null)
-                        return ApiResponse<List<TraineeDto>>.Fail($"Failed to create trainee for {traineeDto.Username}");
+                    var resultDto = _mapper.Map<TraineeDto>(createdTrainee);
+                    resultDto.Username = createdUser.Username;
+                    resultDto.BatchName = batch.BatchName;
 
-                    createdTrainees.Add(createdTrainee);
+                    createdTraineeDtos.Add(resultDto);
                 }
 
-                // await transaction.CommitAsync(cancellationToken);
+                return ApiResponse<List<TraineeDto>>.Success(createdTraineeDtos);
             }
             catch (Exception ex)
             {
-                // await transaction.RollbackAsync(cancellationToken);
                 return ApiResponse<List<TraineeDto>>.Fail($"Error creating trainees: {ex.Message}");
             }
-
-            // Map and return
-            var traineeDtos = _mapper.Map<List<TraineeDto>>(createdTrainees);
-            return ApiResponse<List<TraineeDto>>.Success(traineeDtos);
         }
     }
 }

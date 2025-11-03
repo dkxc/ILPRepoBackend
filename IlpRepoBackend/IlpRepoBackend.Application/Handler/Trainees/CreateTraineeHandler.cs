@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using BCrypt.Net;
 using IlpRepoBackend.Application.Command.Trainees;
 using IlpRepoBackend.Application.Dto;
 using IlpRepoBackend.Application.Wrapper;
 using IlpRepoBackend.Domain.Entities;
+using IlpRepoBackend.Domain.Enum;
 using IlpRepoBackend.Domain.Persistence;
 using MediatR;
 using System;
@@ -13,63 +15,71 @@ namespace IlpRepoBackend.Application.Handler.Trainees
 {
     public class CreateTraineeHandler : IRequestHandler<CreateTraineeCommand, ApiResponse<TraineeDto>>
     {
-        private readonly ITraineeRepository _traineeRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IBatchRepository _batchRepository;
         private readonly IMapper _mapper;
+        private readonly IUserRepository _userRepository;
+        private readonly ITraineeRepository _traineeRepository;
 
-        public CreateTraineeHandler(
-            ITraineeRepository traineeRepository,
-            IUserRepository userRepository,
-            IBatchRepository batchRepository,
-            IMapper mapper)
+        public CreateTraineeHandler(IMapper mapper, IUserRepository userRepository, ITraineeRepository traineeRepository)
         {
-            _traineeRepository = traineeRepository;
-            _userRepository = userRepository;
-            _batchRepository = batchRepository;
             _mapper = mapper;
+            _userRepository = userRepository;
+            _traineeRepository = traineeRepository;
         }
 
         public async Task<ApiResponse<TraineeDto>> Handle(CreateTraineeCommand request, CancellationToken cancellationToken)
         {
-            // 1. Validate email
+            // Check if email already exists
             if (await _userRepository.EmailExistsAsync(request.Email))
                 return ApiResponse<TraineeDto>.Fail("Email already exists");
 
-            // 2. Validate batch
-            var batch = await _batchRepository.GetByIdAsync(request.BatchId);
-            if (batch == null)
-                return ApiResponse<TraineeDto>.Fail("Batch does not exist");
+            // Check if AadhaarId already exists
+            if (!string.IsNullOrEmpty(request.AadhaarId))
+            {
+                var aadhaarExists = await _traineeRepository.AadhaarIdExistsAsync(request.AadhaarId);
+                if (aadhaarExists)
+                    return ApiResponse<TraineeDto>.Fail("A trainee with this Aadhaar ID already exists.");
+            }
 
-            // 3. Create user
+            // Create User
             var user = new User
             {
                 Username = request.Username,
                 Email = request.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                Role = Domain.Enum.UserRole.Trainee,
-                IsActive = request.IsActive,
+                Role = UserRole.Trainee,
+                IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
 
             var createdUser = await _userRepository.AddAsync(user);
-            if (createdUser == null)
-                return ApiResponse<TraineeDto>.Fail("Failed to create user");
 
-            // 4. Create trainee
-            var trainee = _mapper.Map<Trainee>(request);
-            trainee.UserId = createdUser.Id;
+            // Create Trainee
+            var trainee = new Trainee
+            {
+                UserId = createdUser.Id,
+                Email = request.Email,
+                BatchId = request.BatchId,
+                PhoneNo = request.PhoneNo,
+                Status = request.Status,
+                BloodGroup = request.BloodGroup,
+                AadhaarId = request.AadhaarId,
+                HealthCondition = request.HealthCondition,
+                PersonalInterest = request.PersonalInterest,
+                Address = request.Address,
+                CurrentAddress = request.CurrentAddress,
+                ContactNumber = request.ContactNumber,
+                EmergencyContactName = request.EmergencyContactName,
+                EmergencyContactRelationship = request.EmergencyContactRelationship,
+                EmergencyContactNo = request.EmergencyContactNo,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
             var createdTrainee = await _traineeRepository.AddAsync(trainee);
+            var traineeDto = _mapper.Map<TraineeDto>(createdTrainee);
+            traineeDto.Username = createdUser.Username;
 
-            if (createdTrainee == null)
-                return ApiResponse<TraineeDto>.Fail("Failed to create trainee");
-
-            // 5. Fetch trainee with related data (includes)
-            var traineeWithIncludes = await _traineeRepository.GetByIdAsync(createdTrainee.Id);
-            var traineeDto = _mapper.Map<TraineeDto>(traineeWithIncludes);
-
-            // 6. Return success
             return ApiResponse<TraineeDto>.Success(traineeDto);
         }
     }

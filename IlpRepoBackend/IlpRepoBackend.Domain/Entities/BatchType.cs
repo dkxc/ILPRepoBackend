@@ -1,0 +1,15 @@
+using System;
+using System.Collections.Generic;
+
+namespace IlpRepoBackend.Domain.Entities
+{
+    public class BatchType
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+
+        public ICollection<Batch> Batches { get; set; } = new List<Batch>();
+    }
+}
