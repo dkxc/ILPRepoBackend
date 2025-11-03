@@ -70,5 +70,20 @@ namespace IlpRepoBackend.Api.Controllers
 
             return BadRequest(result);
         }
+
+        /// <summary>
+        /// Get link types required for a specific batch with submission statistics
+        /// </summary>
+        [HttpGet("batch/{batchId}")]
+        public async Task<ActionResult<ApiResponse<List<BatchLinkTypeDto>>>> GetLinkTypesByBatchId(int batchId)
+        {
+            var query = new GetLinkTypesByBatchIdQuery(batchId);
+            var result = await _mediator.Send(query);
+
+            if (result.Succeeded)
+                return Ok(result);
+
+            return BadRequest(result);
+        }
     }
 }
