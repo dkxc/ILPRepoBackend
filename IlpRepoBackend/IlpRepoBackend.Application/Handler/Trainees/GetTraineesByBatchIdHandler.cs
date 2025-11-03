@@ -27,5 +27,8 @@ namespace IlpRepoBackend.Application.Handler.Trainees
             var traineeDtos = _mapper.Map<List<TraineeDto>>(trainees);
             return ApiResponse<List<TraineeDto>>.Success(traineeDtos);
         }
+
+
+
     }
 }

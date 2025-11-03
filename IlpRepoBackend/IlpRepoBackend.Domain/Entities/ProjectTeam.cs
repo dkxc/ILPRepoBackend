@@ -9,6 +9,7 @@ namespace IlpRepoBackend.Domain.Entities
 {
     public class ProjectTeam
     {
+        public int Id { get; set; }
         public int ProjectId { get; set; }
         public int TraineeId { get; set; }
         public ProjectRole Role { get; set; }

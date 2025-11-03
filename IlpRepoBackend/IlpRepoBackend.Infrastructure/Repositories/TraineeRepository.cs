@@ -23,7 +23,15 @@ namespace IlpRepoBackend.Infrastructure.Repositories
                 .Include(t => t.User)
                 .Include(t => t.Batch)
                 .ToListAsync();
-        }
+         }
+//         public async Task<List<Trainee>> GetByBatchIdAsync(int batchId)
+//         {
+//             return await _context.Trainees
+//                 .Where(t => t.BatchId == batchId)
+//                 .Include(t => t.User)
+//                 .Include(t => t.Batch)
+//                 .ToListAsync();
+//         }
 
         public async Task<IEnumerable<Trainee>> GetByBatchIdAsync(int batchId)
         {

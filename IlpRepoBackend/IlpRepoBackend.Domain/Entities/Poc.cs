@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace IlpRepoBackend.Domain.Entities
 {
@@ -10,12 +8,11 @@ namespace IlpRepoBackend.Domain.Entities
     {
         public int Id { get; set; }
         public string? Name { get; set; }
-
         public string? Email { get; set; }
-        public int? ProjectId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-
-        public Project? Project { get; set; }
+        [JsonIgnore]
+        public ICollection<PocsForProject> PocsForProjects { get; set; } = new List<PocsForProject>();
     }
+
 }

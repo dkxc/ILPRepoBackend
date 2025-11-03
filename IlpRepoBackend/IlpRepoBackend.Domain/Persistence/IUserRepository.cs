@@ -12,6 +12,11 @@ namespace IlpRepoBackend.Domain.Persistence
         Task<bool> EmailExistsAsync(string email);
         Task<User?> GetByEmailAsync(string email);
         Task<User?> GetByUsernameAsync(string username);
+        //Task<User> GetByUsernameAsync(string username);
+        Task GetUserByEmail(string email);
+        Task LoginUser(string email, string password);
         Task<bool> UsernameExistsAsync(string username);
+       
+        Task<User?> GetUserByEmailAsync(string email);
     }
 }

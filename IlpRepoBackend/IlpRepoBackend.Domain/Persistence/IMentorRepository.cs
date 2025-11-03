@@ -9,6 +9,11 @@ namespace IlpRepoBackend.Domain.Persistence
 {
     public interface IMentorRepository : IGenericRepository<Mentor>
     {
+        // FIXED: Added Task<Mentor?> return type
+        Task<Mentor?> GetByEmailAsync(string? email);
+
+        Task<Mentor?> GetByNameAsync(string v);
+
         Task<IEnumerable<Mentor>> GetByProjectIdAsync(int projectId);
     }
 }

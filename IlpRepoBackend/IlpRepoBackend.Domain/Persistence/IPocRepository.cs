@@ -9,6 +9,8 @@ namespace IlpRepoBackend.Domain.Persistence
 {
     public interface IPocRepository : IGenericRepository<Poc>
     {
-        Task<IEnumerable<Poc>> GetByProjectIdAsync(int projectId);
+        Task<Poc?> GetByEmailAsync(string email);
+        Task<Poc?> GetByNameAsync(string v);
+        Task<List<Poc>> GetPocsByProjectIdAsync(int projectId);
     }
 }

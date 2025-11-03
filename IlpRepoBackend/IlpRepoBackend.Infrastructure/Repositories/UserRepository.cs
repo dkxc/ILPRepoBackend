@@ -44,6 +44,26 @@ namespace IlpRepoBackend.Infrastructure.Repositories
                 .FirstOrDefaultAsync(u => u.Username == normalizedUsername);
         }
 
+        public Task GetUserByEmail(string email)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return null;
+
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+        }
+
+
+        public Task LoginUser(string email, string password)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<bool> UsernameExistsAsync(string username)
         {
             if (string.IsNullOrWhiteSpace(username))
