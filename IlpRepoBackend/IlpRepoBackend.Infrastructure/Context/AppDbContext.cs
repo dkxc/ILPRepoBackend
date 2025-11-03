@@ -41,8 +41,8 @@ namespace IlpRepoBackend.Infrastructure.Context
         public DbSet<PocsForProject> PocsForProjects { get; set; }
         public DbSet<MenterForAProject> MentersForProjects { get; set; }
 
-        public DbSet<PocsForProject> PocsForProjects { get; set; }
-        public DbSet<MenterForAProject> MentersForProjects { get; set; }
+        // public DbSet<PocsForProject> PocsForProjects { get; set; }
+        // public DbSet<MenterForAProject> MentersForProjects { get; set; }
 
 
         public DbSet<EmailConfiguration> EmailConfigurations { get; set; }
