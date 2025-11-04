@@ -400,11 +400,11 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
 
-                entity.HasIndex(e => new { e.TraineeId, e.AssessmentType }).IsUnique();
+                entity.HasIndex(e => e.TraineeId).IsUnique();
 
                 entity.HasOne(e => e.Trainee)
-                    .WithMany(t => t.Feedbacks)
-                    .HasForeignKey(e => e.TraineeId)
+                    .WithOne(t => t.Feedback)
+                    .HasForeignKey<Feedback>(e => e.TraineeId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
