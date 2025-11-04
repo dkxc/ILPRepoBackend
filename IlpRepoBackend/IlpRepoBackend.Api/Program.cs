@@ -1,14 +1,13 @@
 using IlpRepoBackend.Api.Middleware;
 using IlpRepoBackend.Application;
+using IlpRepoBackend.Application.Handler.AdminDashboard;
 using IlpRepoBackend.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-
+using System.Text;
+using System.Text;
 using System.Text.Json.Serialization;
-using System.Text;
-
-using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -100,6 +99,8 @@ builder.Services.AddAuthorization();
 // Register Application and Infrastructure services
 builder.Services.AddApplicationServices();
 builder.Services.AddPersistenceServices(builder.Configuration);
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(GetBatchDetailQueryHandler).Assembly));
 
 //builder.Services.AddInfrastructureServices(builder.Configuration);
 

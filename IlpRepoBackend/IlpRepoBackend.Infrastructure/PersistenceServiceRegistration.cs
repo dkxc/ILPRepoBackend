@@ -1,4 +1,4 @@
-﻿using IlpRepoBackend.Application.BackgroundServices;
+using IlpRepoBackend.Application.BackgroundServices;
 using IlpRepoBackend.Application.Services;
 using IlpRepoBackend.Domain.Entities;
 using IlpRepoBackend.Domain.Persistence;
@@ -31,6 +31,8 @@ namespace IlpRepoBackend.Infrastructure
             services.AddScoped<IProjectRepository, ProjectRepository>();
             services.AddScoped<IProjecTeamRepository, ProjecTeamRepository>();
             services.AddScoped<IPocForAProjectRepository, PocForAProjectRepository>();
+            services.AddScoped<IAttendanceRepository, AttendanceRepository>();
+            services.AddScoped<ITrainingScheduleRepository, TrainingScheduleRepository>();
             services.AddScoped<IMentorRepository, MenterRepository>();
             services.AddScoped<IMentorForPRojectRepository, MentorForPRojectRepository>();
             services.AddScoped<IPocRepository, PocRepository>();
@@ -60,6 +62,8 @@ namespace IlpRepoBackend.Infrastructure
             services.AddScoped<IBuddyRepository, BuddyRepository>();
             services.AddScoped<IOtpService, OtpService>();
             services.AddScoped<IPasswordSetupEmailService, PasswordSetupEmailService>();
+            services.AddScoped<IPhaseRepository, PhaseRepository>();
+
             return services;
         }
     }
