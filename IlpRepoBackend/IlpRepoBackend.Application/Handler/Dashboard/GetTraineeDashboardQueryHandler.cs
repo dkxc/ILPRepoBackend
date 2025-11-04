@@ -16,20 +16,20 @@ namespace IlpRepoBackend.Application.Handler.Dashboard
     {
         private readonly ITraineeRepository _traineeRepository;
         private readonly IProjectRepository _projectRepository;
-        private readonly ITrainingScheduleRepository _trainingScheduleRepository;
+        private readonly ICurriculumRepository _curriculumRepository;
         private readonly IDocumentRepository _documentRepository;
         private readonly IDocumentRequestRepository _documentRequestRepository;
 
         public GetTraineeDashboardQueryHandler(
             ITraineeRepository traineeRepository,
             IProjectRepository projectRepository,
-            ITrainingScheduleRepository trainingScheduleRepository,
+            ICurriculumRepository curriculumRepository,
             IDocumentRepository documentRepository,
             IDocumentRequestRepository documentRequestRepository)
         {
             _traineeRepository = traineeRepository;
             _projectRepository = projectRepository;
-            _trainingScheduleRepository = trainingScheduleRepository;
+            _curriculumRepository = curriculumRepository;
             _documentRepository = documentRepository;
             _documentRequestRepository = documentRequestRepository;
         }
@@ -84,13 +84,13 @@ namespace IlpRepoBackend.Application.Handler.Dashboard
             var scores = CalculateScoresAndRank(trainee.Id, allTraineesInBatch);
 
             // 4. Get Sessions Data
-            var sessions = (await _trainingScheduleRepository.GetByBatchIdAsync(trainee.BatchId))
+            var sessions = (await _curriculumRepository.GetByBatchIdAsync(trainee.BatchId))
                 .Select(s => new SessionDto
                 {
                     Id = s.Id,
                     Title = s.Title,
-                    Category = s.Category,
-                    Date = s.TrainingDate
+                    Category = s.Color ?? "default",
+                    Date = s.Start
                 }).ToList();
 
             // 5. Get Project-specific Documents

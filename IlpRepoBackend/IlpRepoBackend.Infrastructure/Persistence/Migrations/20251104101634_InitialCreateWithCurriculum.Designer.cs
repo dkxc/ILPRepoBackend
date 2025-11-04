@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace IlpRepoBackend.Infrastructure.Migrations
+namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251103134745_InitialDbCreate")]
-    partial class InitialDbCreate
+    [Migration("20251104101634_InitialCreateWithCurriculum")]
+    partial class InitialCreateWithCurriculum
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -288,6 +288,49 @@ namespace IlpRepoBackend.Infrastructure.Migrations
                     b.ToTable("buddies", (string)null);
                 });
 
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Curriculum", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BatchId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Color")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("End")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Instructor")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BatchId");
+
+                    b.ToTable("Curriculums");
+                });
+
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.DocumentRequest", b =>
                 {
                     b.Property<int>("Id")
@@ -409,7 +452,6 @@ namespace IlpRepoBackend.Infrastructure.Migrations
                         .HasDefaultValueSql("now()");
 
                     b.Property<string>("FileType")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("file_type");
@@ -1550,6 +1592,17 @@ namespace IlpRepoBackend.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Du");
+                });
+
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Curriculum", b =>
+                {
+                    b.HasOne("IlpRepoBackend.Domain.Entities.Batch", "Batch")
+                        .WithMany()
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Batch");
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.DocumentRequest", b =>

@@ -6,10 +6,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace IlpRepoBackend.Infrastructure.Migrations
+namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDbCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,7 +52,7 @@ namespace IlpRepoBackend.Infrastructure.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    file_type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    file_type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     link = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     upload_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
