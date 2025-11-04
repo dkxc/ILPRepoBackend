@@ -14,7 +14,18 @@ namespace IlpRepoBackend.Application.Mapping
             CreateMap<Poc, PocDto>();
             CreateMap<DocumentRequest, DocumentRequestDto>()
                 .ForMember(dest => dest.DocumentName, opt => opt.MapFrom(src => src.Document != null ? src.Document.Name : null));
-            CreateMap<DocumentSubmission, DocumentSubmissionDto>();
+
+            // Add mapping for DocumentSubmission with RequestId
+            CreateMap<DocumentSubmission, DocumentSubmissionDto>()
+                .ForMember(dest => dest.requistid, opt => opt.MapFrom(src => src.RequestId.HasValue ? src.RequestId.Value.ToString() : string.Empty))
+                .ForMember(dest => dest.DocumentName, opt => opt.MapFrom(src =>
+                    src.DocumentRequest != null && src.DocumentRequest.Document != null
+                        ? src.DocumentRequest.Document.Name
+                        : null))
+                .ForMember(dest => dest.RequestDueDate, opt => opt.MapFrom(src =>
+                    src.DocumentRequest != null
+                        ? (DateTime?)src.DocumentRequest.DueDate
+                        : null));
 
             // Project Entity -> ProjectDto
             CreateMap<Project, ProjectDto>()
