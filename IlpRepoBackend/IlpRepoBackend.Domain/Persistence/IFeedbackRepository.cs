@@ -9,6 +9,6 @@ namespace IlpRepoBackend.Domain.Persistence
 {
     public interface IFeedbackRepository : IGenericRepository<Feedback>
     {
-        Task<Feedback?> GetByTraineeIdAsync(int traineeId);
+        Task<IEnumerable<Feedback>> GetByTraineeIdAsync(int traineeId);
     }
 }
