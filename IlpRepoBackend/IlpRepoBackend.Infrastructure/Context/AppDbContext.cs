@@ -1,4 +1,4 @@
-﻿using IlpRepoBackend.Domain.Entities;
+using IlpRepoBackend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace IlpRepoBackend.Infrastructure.Context
@@ -415,6 +415,8 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
                 entity.Property(e => e.BatchId).HasColumnName("batch_id");
+                entity.Property(e => e.Title).HasColumnName("title").IsRequired().HasMaxLength(255); // ADDED
+                entity.Property(e => e.Category).HasColumnName("category").HasMaxLength(100); // ADDED
                 entity.Property(e => e.TrainingDate).HasColumnName("training_date").IsRequired();
                 entity.Property(e => e.Hours).HasColumnName("hours").IsRequired();
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
