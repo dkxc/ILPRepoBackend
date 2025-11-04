@@ -60,6 +60,8 @@ namespace IlpRepoBackend.Infrastructure
             services.AddScoped<IDuRepository, DuRepository>();
             services.AddScoped<IBoPhaseRepository, BoPhaseRepository>();
             services.AddScoped<IBuddyRepository, BuddyRepository>();
+            services.AddScoped<IOtpService, OtpService>();
+            services.AddScoped<IPasswordSetupEmailService, PasswordSetupEmailService>();
             services.AddScoped<IPhaseRepository, PhaseRepository>();
 
             return services;
