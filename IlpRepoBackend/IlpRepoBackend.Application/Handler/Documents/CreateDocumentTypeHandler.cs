@@ -59,6 +59,7 @@ namespace IlpRepoBackend.Application.Handler.Documents
                 var document = new Domain.Entities.Documents
                 {
                     Name = request.Name,
+                    FileType = request.FileType,
                     Link = fileUrl,
                     UploadDate = fileUrl != null ? DateTime.UtcNow : DateTime.MinValue,
                     CreatedAt = DateTime.UtcNow,
@@ -73,6 +74,7 @@ namespace IlpRepoBackend.Application.Handler.Documents
                 {
                     Id = document.Id,
                     Name = document.Name,
+                    FileType = document.FileType,
                     Link = document.Link,
                     CreatedAt = document.CreatedAt
                 };
