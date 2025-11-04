@@ -4,10 +4,12 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+namespace IlpRepoBackend.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreateSupabase : Migration
+    public partial class InitialDbCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -29,22 +31,18 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "batches",
+                name: "batch_types",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    batch_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    batch_type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    status = table.Column<string>(type: "text", nullable: false),
-                    start_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_batches", x => x.id);
+                    table.PrimaryKey("PK_batch_types", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -54,6 +52,7 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    file_type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     link = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     upload_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
@@ -77,6 +76,27 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_dus", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmailConfigurations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ServiceName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    ServiceDescription = table.Column<string>(type: "text", nullable: false),
+                    DaysBeforeDueDate = table.Column<int>(type: "integer", nullable: false),
+                    ScheduledTime = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    EmailSubject = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    EmailBodyTemplate = table.Column<string>(type: "text", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmailConfigurations", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -127,6 +147,21 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "phase_types",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_phase_types", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "pocs",
                 columns: table => new
                 {
@@ -165,7 +200,8 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:IdentitySequenceOptions", "'1', '1', '', '', 'False', '1'")
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
                     email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     password_hash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
@@ -180,24 +216,26 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "training_schedule",
+                name: "batches",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    batch_id = table.Column<int>(type: "integer", nullable: true),
-                    training_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    hours = table.Column<int>(type: "integer", nullable: false),
+                    batch_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    batch_type_id = table.Column<int>(type: "integer", nullable: true),
+                    status = table.Column<string>(type: "text", nullable: false),
+                    start_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_training_schedule", x => x.id);
+                    table.PrimaryKey("PK_batches", x => x.id);
                     table.ForeignKey(
-                        name: "FK_training_schedule_batches_batch_id",
-                        column: x => x.batch_id,
-                        principalTable: "batches",
+                        name: "FK_batches_batch_types_batch_type_id",
+                        column: x => x.batch_type_id,
+                        principalTable: "batch_types",
                         principalColumn: "id",
                         onDelete: ReferentialAction.SetNull);
                 });
@@ -222,6 +260,35 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         principalTable: "dus",
                         principalColumn: "id",
                         onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmailLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    EmailConfigurationId = table.Column<int>(type: "integer", nullable: false),
+                    RecipientEmail = table.Column<string>(type: "text", nullable: false),
+                    RecipientName = table.Column<string>(type: "text", nullable: false),
+                    Subject = table.Column<string>(type: "text", nullable: false),
+                    Body = table.Column<string>(type: "text", nullable: false),
+                    IsSent = table.Column<bool>(type: "boolean", nullable: false),
+                    ErrorMessage = table.Column<string>(type: "text", nullable: true),
+                    RelatedEntityId = table.Column<int>(type: "integer", nullable: true),
+                    RelatedEntityType = table.Column<string>(type: "text", nullable: true),
+                    SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmailLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmailLogs_EmailConfigurations_EmailConfigurationId",
+                        column: x => x.EmailConfigurationId,
+                        principalTable: "EmailConfigurations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -337,11 +404,43 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "trainees",
+                name: "phases",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    phase_type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    start_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    batch_id = table.Column<int>(type: "integer", nullable: false),
+                    phase_type_id = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_phases", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_phases_batches_batch_id",
+                        column: x => x.batch_id,
+                        principalTable: "batches",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_phases_phase_types_phase_type_id",
+                        column: x => x.phase_type_id,
+                        principalTable: "phase_types",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "trainees",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:IdentitySequenceOptions", "'1', '1', '', '', 'False', '1'")
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
                     user_id = table.Column<int>(type: "integer", nullable: false),
                     email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     batch_id = table.Column<int>(type: "integer", nullable: false),
@@ -352,6 +451,8 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     health_condition = table.Column<string>(type: "text", nullable: true),
                     personal_interest = table.Column<string>(type: "text", nullable: true),
                     address = table.Column<string>(type: "text", nullable: true),
+                    current_address = table.Column<string>(type: "text", nullable: true),
+                    contact_number = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: true),
                     emergency_contact_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     emergency_contact_relationship = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     emergency_contact_no = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: true),
@@ -373,6 +474,31 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "training_schedule",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    batch_id = table.Column<int>(type: "integer", nullable: true),
+                    title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    category = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    training_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    hours = table.Column<int>(type: "integer", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_training_schedule", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_training_schedule_batches_batch_id",
+                        column: x => x.batch_id,
+                        principalTable: "batches",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -428,6 +554,30 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         principalTable: "document_requests",
                         principalColumn: "id",
                         onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "attendances",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    trainee_id = table.Column<int>(type: "integer", nullable: false),
+                    date = table.Column<DateOnly>(type: "date", nullable: false),
+                    forenoon_status = table.Column<string>(type: "text", nullable: false),
+                    afternoon_status = table.Column<string>(type: "text", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_attendances", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_attendances_trainees_trainee_id",
+                        column: x => x.trainee_id,
+                        principalTable: "trainees",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -621,6 +771,39 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         onDelete: ReferentialAction.SetNull);
                 });
 
+            migrationBuilder.InsertData(
+                table: "batch_types",
+                columns: new[] { "id", "created_at", "name", "updated_at" },
+                values: new object[,]
+                {
+                    { 1, new DateTime(2025, 10, 29, 12, 56, 6, 0, DateTimeKind.Utc).AddTicks(9037), "Associate Software Developer", new DateTime(2025, 10, 29, 12, 56, 6, 0, DateTimeKind.Utc).AddTicks(9335) },
+                    { 2, new DateTime(2025, 10, 29, 12, 56, 6, 0, DateTimeKind.Utc).AddTicks(9578), "SDET", new DateTime(2025, 10, 29, 12, 56, 6, 0, DateTimeKind.Utc).AddTicks(9579) },
+                    { 3, new DateTime(2025, 10, 29, 12, 56, 6, 0, DateTimeKind.Utc).AddTicks(9580), "Business Analysis", new DateTime(2025, 10, 29, 12, 56, 6, 0, DateTimeKind.Utc).AddTicks(9580) }
+                });
+
+            migrationBuilder.InsertData(
+                table: "phase_types",
+                columns: new[] { "id", "created_at", "name", "updated_at" },
+                values: new object[,]
+                {
+                    { 1, new DateTime(2025, 10, 29, 13, 30, 0, 0, DateTimeKind.Utc), "E Learning Phase", new DateTime(2025, 10, 29, 13, 30, 0, 0, DateTimeKind.Utc) },
+                    { 2, new DateTime(2025, 10, 29, 13, 30, 1, 0, DateTimeKind.Utc), "Tech Fundamentals Phase", new DateTime(2025, 10, 29, 13, 30, 1, 0, DateTimeKind.Utc) },
+                    { 3, new DateTime(2025, 10, 29, 13, 30, 2, 0, DateTimeKind.Utc), "Specialization Phase", new DateTime(2025, 10, 29, 13, 30, 2, 0, DateTimeKind.Utc) },
+                    { 4, new DateTime(2025, 10, 29, 13, 30, 3, 0, DateTimeKind.Utc), "Business Orientation Phase", new DateTime(2025, 10, 29, 13, 30, 3, 0, DateTimeKind.Utc) },
+                    { 5, new DateTime(2025, 10, 29, 13, 30, 4, 0, DateTimeKind.Utc), "OJT Phase", new DateTime(2025, 10, 29, 13, 30, 4, 0, DateTimeKind.Utc) }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_attendances_trainee_id_date",
+                table: "attendances",
+                columns: new[] { "trainee_id", "date" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_batches_batch_type_id",
+                table: "batches",
+                column: "batch_type_id");
+
             migrationBuilder.CreateIndex(
                 name: "IX_bo_phases_buddy_id",
                 table: "bo_phases",
@@ -655,6 +838,11 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 name: "IX_document_submissions_request_id",
                 table: "document_submissions",
                 column: "request_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmailLogs_EmailConfigurationId",
+                table: "EmailLogs",
+                column: "EmailConfigurationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_feedback_header_responses_feedback_header_id",
@@ -692,6 +880,16 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 name: "IX_notifications_document_request_id",
                 table: "notifications",
                 column: "document_request_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_phases_batch_id",
+                table: "phases",
+                column: "batch_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_phases_phase_type_id",
+                table: "phases",
+                column: "phase_type_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_pocs_email",
@@ -788,10 +986,16 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "attendances");
+
+            migrationBuilder.DropTable(
                 name: "bo_phases");
 
             migrationBuilder.DropTable(
                 name: "document_submissions");
+
+            migrationBuilder.DropTable(
+                name: "EmailLogs");
 
             migrationBuilder.DropTable(
                 name: "feedback_header_responses");
@@ -801,6 +1005,9 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "notifications");
+
+            migrationBuilder.DropTable(
+                name: "phases");
 
             migrationBuilder.DropTable(
                 name: "pocs_for_project");
@@ -827,6 +1034,9 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 name: "buddies");
 
             migrationBuilder.DropTable(
+                name: "EmailConfigurations");
+
+            migrationBuilder.DropTable(
                 name: "feedback_headers");
 
             migrationBuilder.DropTable(
@@ -837,6 +1047,9 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "document_requests");
+
+            migrationBuilder.DropTable(
+                name: "phase_types");
 
             migrationBuilder.DropTable(
                 name: "pocs");
@@ -864,6 +1077,9 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "users");
+
+            migrationBuilder.DropTable(
+                name: "batch_types");
         }
     }
 }

@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
+namespace IlpRepoBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -55,6 +55,53 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("assessments", (string)null);
+                });
+
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Attendance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AfternoonStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("afternoon_status");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
+                    b.Property<string>("ForenoonStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("forenoon_status");
+
+                    b.Property<int>("TraineeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("trainee_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TraineeId", "Date")
+                        .IsUnique();
+
+                    b.ToTable("attendances", (string)null);
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Batch", b =>
@@ -1356,6 +1403,12 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("batch_id");
 
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("category");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -1365,6 +1418,12 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.Property<int>("Hours")
                         .HasColumnType("integer")
                         .HasColumnName("hours");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("title");
 
                     b.Property<DateTime>("TrainingDate")
                         .HasColumnType("timestamp with time zone")
@@ -1440,6 +1499,17 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Attendance", b =>
+                {
+                    b.HasOne("IlpRepoBackend.Domain.Entities.Trainee", "Trainee")
+                        .WithMany()
+                        .HasForeignKey("TraineeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Trainee");
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Batch", b =>
@@ -1795,14 +1865,6 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.PhaseType", b =>
                 {
                     b.Navigation("Phases");
-            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Mentor", b =>
-                {
-                    b.Navigation("MenterForProjects");
-                });
-
-            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Poc", b =>
-                {
-                    b.Navigation("PocsForProjects");
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Poc", b =>
@@ -1838,7 +1900,6 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.Navigation("TraineeDus");
                 });
 #pragma warning restore 612, 618
-        });
+        }
     }
-}
 }
