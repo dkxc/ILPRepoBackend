@@ -1,7 +1,9 @@
 using IlpRepoBackend.Api.Middleware;
 using IlpRepoBackend.Application;
 using IlpRepoBackend.Application.Handler.AdminDashboard;
+using IlpRepoBackend.Domain.Persistence;
 using IlpRepoBackend.Infrastructure;
+using IlpRepoBackend.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -99,6 +101,10 @@ builder.Services.AddAuthorization();
 // Register Application and Infrastructure services
 builder.Services.AddApplicationServices();
 builder.Services.AddPersistenceServices(builder.Configuration);
+
+builder.Services.AddScoped<ITrainingScheduleRepository, TrainingScheduleRepository>();
+builder.Services.AddScoped<IBatchTypeRepository, BatchTypeRepository>();
+
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(GetBatchDetailQueryHandler).Assembly));
 

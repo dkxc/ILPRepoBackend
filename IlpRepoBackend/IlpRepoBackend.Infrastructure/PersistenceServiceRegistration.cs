@@ -63,6 +63,8 @@ namespace IlpRepoBackend.Infrastructure
             services.AddScoped<IOtpService, OtpService>();
             services.AddScoped<IPasswordSetupEmailService, PasswordSetupEmailService>();
             services.AddScoped<IPhaseRepository, PhaseRepository>();
+            services.AddScoped<ITrainingScheduleRepository, TrainingScheduleRepository>();
+
 
             return services;
         }

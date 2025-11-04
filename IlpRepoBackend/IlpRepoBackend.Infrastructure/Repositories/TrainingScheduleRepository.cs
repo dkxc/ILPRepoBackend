@@ -18,12 +18,28 @@ namespace IlpRepoBackend.Infrastructure.Repositories
             _context = context;
         }
 
+        public async Task<IEnumerable<TrainingSchedule>> GetByBatchTypeAndDateRangeAsync(int? batchTypeId, DateTime startDate, DateTime endDate)
+        {
+            var query = _context.TrainingSchedules
+                .Include(ts => ts.Batch)
+                .ThenInclude(b => b.BatchType)
+                .Where(ts => ts.TrainingDate >= startDate && ts.TrainingDate <= endDate);
+
+            if (batchTypeId.HasValue)
+                query = query.Where(ts => ts.Batch.BatchTypeId == batchTypeId.Value);
+
+            return await query.ToListAsync();
+        }
         public async Task<IEnumerable<TrainingSchedule>> GetByBatchIdAsync(int batchId)
         {
             return await _context.TrainingSchedules
                 .Where(t => t.BatchId == batchId)
                 .ToListAsync();
         }
-
+        public async Task AddRangeAsync(IEnumerable<TrainingSchedule> schedules)
+        {
+            await _context.TrainingSchedules.AddRangeAsync(schedules);
+            await _context.SaveChangesAsync();
+        }
     }
 }
