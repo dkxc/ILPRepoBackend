@@ -10,6 +10,8 @@ namespace IlpRepoBackend.Domain.Enum
     {
         TechFundamentals,
         Specialisation,
+        Frontend,
+        Backend,
         BO
     }
 }

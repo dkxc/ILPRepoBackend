@@ -552,7 +552,7 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TraineeId")
+                    b.HasIndex("TraineeId", "AssessmentType")
                         .IsUnique();
 
                     b.ToTable("feedbacks", (string)null);
@@ -1527,8 +1527,8 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Feedback", b =>
                 {
                     b.HasOne("IlpRepoBackend.Domain.Entities.Trainee", "Trainee")
-                        .WithOne("Feedback")
-                        .HasForeignKey("IlpRepoBackend.Domain.Entities.Feedback", "TraineeId")
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("TraineeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1795,14 +1795,6 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.PhaseType", b =>
                 {
                     b.Navigation("Phases");
-            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Mentor", b =>
-                {
-                    b.Navigation("MenterForProjects");
-                });
-
-            modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Poc", b =>
-                {
-                    b.Navigation("PocsForProjects");
                 });
 
             modelBuilder.Entity("IlpRepoBackend.Domain.Entities.Poc", b =>
@@ -1827,7 +1819,7 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("BoPhases");
 
-                    b.Navigation("Feedback");
+                    b.Navigation("Feedbacks");
 
                     b.Navigation("ProjectTeams");
 
@@ -1838,7 +1830,6 @@ namespace IlpRepoBackend.Infrastructure.Persistence.Migrations
                     b.Navigation("TraineeDus");
                 });
 #pragma warning restore 612, 618
-        });
+        }
     }
-}
 }

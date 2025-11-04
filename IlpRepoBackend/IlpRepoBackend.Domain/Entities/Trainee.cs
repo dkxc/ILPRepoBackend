@@ -29,7 +29,7 @@ namespace IlpRepoBackend.Domain.Entities
         public Batch Batch { get; set; } = null!;
         public ICollection<ProjectTeam> ProjectTeams { get; set; } = new List<ProjectTeam>();
         public ICollection<Result> Results { get; set; } = new List<Result>();
-        public Feedback? Feedback { get; set; }
+        public ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
         public ICollection<TraineeActivity> TraineeActivities { get; set; } = new List<TraineeActivity>();
         public ICollection<BoPhase> BoPhases { get; set; } = new List<BoPhase>();
         public ICollection<TraineeDu> TraineeDus { get; set; } = new List<TraineeDu>();

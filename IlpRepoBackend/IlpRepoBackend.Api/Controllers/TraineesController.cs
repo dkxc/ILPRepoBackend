@@ -1,9 +1,12 @@
 ﻿using IlpRepoBackend.Application.Command.Trainees;
 using IlpRepoBackend.Application.Dto;
+using IlpRepoBackend.Application.Queries.Results;
 using IlpRepoBackend.Application.Query.Trainees;
+using IlpRepoBackend.Domain.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace IlpRepoBackend.Api.Controllers
@@ -13,10 +16,12 @@ namespace IlpRepoBackend.Api.Controllers
     public class TraineesController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ITraineeRepository _traineeRepository; 
         
-        public TraineesController(IMediator mediator)
+        public TraineesController(IMediator mediator, ITraineeRepository traineeRepository)
         {
             _mediator = mediator;
+            _traineeRepository = traineeRepository;
         }
 
         [HttpPost]
@@ -110,6 +115,34 @@ namespace IlpRepoBackend.Api.Controllers
             var result = await _mediator.Send(command);
             if (!result.Succeeded)
                 return BadRequest(result);
+
+            return Ok(result);
+        }
+
+
+        [HttpGet("my-results")]
+         public async Task<IActionResult> GetMyResults()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+
+            // You will need a way to get traineeId from userId. 
+            // We can add a method to the trainee repository for this.
+            // Let's assume you've added `GetByUserIdAsync` to your `ITraineeRepository`
+            var trainee = await _traineeRepository.GetByUserIdAsync(userId);
+            if (trainee == null)
+            {
+                return NotFound("Trainee profile not found for the logged-in user.");
+            }
+
+            var query = new GetTraineeResultsQuery { TraineeId = trainee.Id };
+            var result = await _mediator.Send(query);
+
+            if (!result.Succeeded)
+                return NotFound(result);
 
             return Ok(result);
         }

@@ -59,6 +59,11 @@ namespace IlpRepoBackend.Infrastructure
             services.AddScoped<IBoPhaseRepository, BoPhaseRepository>();
             services.AddScoped<IBuddyRepository, BuddyRepository>();
 
+            services.AddScoped<IAssessmentRepository, AssessmentRepository>();
+            services.AddScoped<IResultRepository, ResultRepository>();
+            services.AddScoped<IFeedbackRepository, FeedbackRepository>();
+            services.AddScoped<IFeedbackHeaderRepository, FeedbackHeaderRepository>();
+            services.AddScoped<IFeedbackHeaderResponseRepository, FeedbackHeaderResponseRepository>();
             return services;
         }
     }
