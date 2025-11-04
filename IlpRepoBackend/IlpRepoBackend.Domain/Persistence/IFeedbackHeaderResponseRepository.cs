@@ -9,6 +9,6 @@ namespace IlpRepoBackend.Domain.Persistence
 {
     public interface IFeedbackHeaderResponseRepository : IGenericRepository<FeedbackHeaderResponse>
     {
-        //Task<IEnumerable<FeedbackHeaderResponse>> GetByFeedbackIdAsync(int feedbackId);
+        Task<IEnumerable<FeedbackHeaderResponse>> GetByFeedbackIdAsync(int feedbackId);
     }
 }
