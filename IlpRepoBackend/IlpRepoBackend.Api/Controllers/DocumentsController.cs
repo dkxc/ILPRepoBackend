@@ -43,7 +43,7 @@ namespace IlpRepoBackend.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var command = new CreateDocumentTypeCommand(request.Name, request.TemplateFile);
+            var command = new CreateDocumentTypeCommand(request.Name, request.TemplateFile, request.FileType);
             var result = await _mediator.Send(command);
 
             if (result.Succeeded)
@@ -62,7 +62,7 @@ namespace IlpRepoBackend.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var command = new UpdateDocumentTypeCommand(id, request.Name, request.TemplateFile);
+            var command = new UpdateDocumentTypeCommand(id, request.Name, request.TemplateFile, request.FileType);
             var result = await _mediator.Send(command);
 
             if (result.Succeeded)
@@ -82,6 +82,9 @@ namespace IlpRepoBackend.Api.Controllers
         public string Name { get; set; } = string.Empty;
 
         public IFormFile? TemplateFile { get; set; }
+        
+        [System.ComponentModel.DataAnnotations.StringLength(50, ErrorMessage = "File type cannot exceed 50 characters")]
+        public string? FileType { get; set; }
     }
 
     /// <summary>
@@ -94,5 +97,8 @@ namespace IlpRepoBackend.Api.Controllers
         public string Name { get; set; } = string.Empty;
 
         public IFormFile? TemplateFile { get; set; }
+        
+        [System.ComponentModel.DataAnnotations.StringLength(50, ErrorMessage = "File type cannot exceed 50 characters")]
+        public string? FileType { get; set; }
     }
 }
