@@ -14,6 +14,7 @@ namespace IlpRepoBackend.Infrastructure.Context
         public DbSet<Batch> Batches { get; set; }
         public DbSet<Trainee> Trainees { get; set; }
         public DbSet<Project> Projects { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
         public DbSet<Mentor> Mentors { get; set; }
         public DbSet<Poc> Pocs { get; set; }
         public DbSet<Link> Links { get; set; }
@@ -163,6 +164,26 @@ namespace IlpRepoBackend.Infrastructure.Context
                 entity.Property(e => e.Technology).HasColumnName("technology").HasMaxLength(255);
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
+            });
+
+            modelBuilder.Entity<Attendance>(entity =>
+            {
+                entity.ToTable("attendances");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+                entity.Property(e => e.TraineeId).HasColumnName("trainee_id").IsRequired();
+                entity.Property(e => e.Date).HasColumnName("date").IsRequired();
+                entity.Property(e => e.ForenoonStatus).HasColumnName("forenoon_status").HasConversion<string>().IsRequired();
+                entity.Property(e => e.AfternoonStatus).HasColumnName("afternoon_status").HasConversion<string>().IsRequired();
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
+
+                entity.HasIndex(e => new { e.TraineeId, e.Date }).IsUnique();
+
+                entity.HasOne(e => e.Trainee)
+                    .WithMany()
+                    .HasForeignKey(e => e.TraineeId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Mentor Configuration
