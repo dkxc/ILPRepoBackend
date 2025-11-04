@@ -1,4 +1,5 @@
 ﻿using IlpRepoBackend.Application.Command.Users;
+using IlpRepoBackend.Application.Dto;
 using IlpRepoBackend.Application.Query;
 using IlpRepoBackend.Application.Query.Users;
 using IlpRepoBackend.Application.Wrapper;
@@ -115,6 +116,17 @@ namespace IlpRepoBackend.Api.Controllers
             {
                 return StatusCode(500, new { message = "An error occurred while updating password" });
             }
+        }
+
+        [HttpGet("admins")]
+        public async Task<ActionResult<List<UserDto>>> GetAllAdmins()
+        {
+            var result = await _mediator.Send(new GetAllAdmin());
+
+            if (result == null || result.Count == 0)
+                return NotFound("No admin users found.");
+
+            return Ok(result);
         }
     }
 

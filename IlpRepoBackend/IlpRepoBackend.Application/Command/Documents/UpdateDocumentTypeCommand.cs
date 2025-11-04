@@ -10,12 +10,14 @@ namespace IlpRepoBackend.Application.Command.Documents
         public int Id { get; set; }
         public string Name { get; set; }
         public IFormFile? TemplateFile { get; set; }
+        public string? FileType { get; set; }
 
-        public UpdateDocumentTypeCommand(int id, string name, IFormFile? templateFile = null)
+        public UpdateDocumentTypeCommand(int id, string name, IFormFile? templateFile = null, string? fileType = null)
         {
             Id = id;
             Name = name;
             TemplateFile = templateFile;
+            FileType = fileType;
         }
     }
 }

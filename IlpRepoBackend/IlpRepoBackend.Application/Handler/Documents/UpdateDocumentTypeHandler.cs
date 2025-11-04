@@ -34,8 +34,9 @@ namespace IlpRepoBackend.Application.Handler.Documents
                     return ApiResponse<DocumentTypeDto>.Fail($"Document type with ID {request.Id} not found");
                 }
 
-                // Update name
+                // Update name and file type
                 document.Name = request.Name;
+                document.FileType = request.FileType;
 
                 // Handle file upload if provided
                 if (request.TemplateFile != null)
@@ -63,6 +64,7 @@ namespace IlpRepoBackend.Application.Handler.Documents
                 {
                     Id = updatedDocument.Id,
                     Name = updatedDocument.Name,
+                    FileType = updatedDocument.FileType,
                     Link = updatedDocument.Link,
                     UploadDate = updatedDocument.UploadDate,
                     CreatedAt = updatedDocument.CreatedAt,

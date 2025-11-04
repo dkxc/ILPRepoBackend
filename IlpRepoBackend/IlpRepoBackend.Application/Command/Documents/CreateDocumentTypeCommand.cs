@@ -9,11 +9,13 @@ namespace IlpRepoBackend.Application.Command.Documents
     {
         public string Name { get; set; }
         public IFormFile? TemplateFile { get; set; }
+        public string? FileType { get; set; }
 
-        public CreateDocumentTypeCommand(string name, IFormFile? templateFile = null)
+        public CreateDocumentTypeCommand(string name, IFormFile? templateFile = null, string? fileType = null)
         {
             Name = name;
             TemplateFile = templateFile;
+            FileType = fileType;
         }
     }
 }
