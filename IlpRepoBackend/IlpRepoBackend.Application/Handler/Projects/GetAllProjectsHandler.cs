@@ -82,6 +82,7 @@ namespace IlpRepoBackend.Application.Handler.Projects
                         {
                             projectDto.BatchId = batch.Id;
                             projectDto.BatchName = batch.BatchName ?? string.Empty;
+
                         }
                     }
 

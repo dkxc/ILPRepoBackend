@@ -35,6 +35,8 @@ namespace IlpRepoBackend.Application.Dto.Project
         public int Id { get; set; }
         public string? FileName { get; set; }
         public string? FileType { get; set; }
+
+        public string requistid { get; set; } // ID of the related DocumentRequest
         public string? SubmissionLink { get; set; }
         public DateTime SubmissionDate { get; set; }
         public string? DocumentName { get; set; } // Name of the document being submitted
