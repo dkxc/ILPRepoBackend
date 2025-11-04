@@ -1,5 +1,4 @@
-﻿//using IlpRepoBackend.Application.Services;
-using IlpRepoBackend.Application.Services;
+﻿using IlpRepoBackend.Application.Services;
 using IlpRepoBackend.Domain.Entities;
 using IlpRepoBackend.Domain.Persistence;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IlpRepoBackend.Application.BackgroundServices
@@ -17,7 +16,8 @@ namespace IlpRepoBackend.Application.BackgroundServices
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<DocumentReminderBackgroundService> _logger;
-        private readonly TimeSpan _scheduledTime = new TimeSpan(9, 0, 0); // 9:00 AM
+        private const int ConfigId = 1; // Fixed ID for DocumentRequestReminder service
+        private const string ServiceName = "DocumentRequestReminder";
 
         public DocumentReminderBackgroundService(
             IServiceProvider serviceProvider,
@@ -29,14 +29,39 @@ namespace IlpRepoBackend.Application.BackgroundServices
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Document Reminder Background Service is starting.");
+            _logger.LogInformation($"Document Reminder Background Service (ID: {ConfigId}) is starting.");
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
+                    // Get the scheduled time from database configuration
+                    TimeSpan scheduledTime;
+
+                    using (var scope = _serviceProvider.CreateScope())
+                    {
+                        var emailConfigRepository = scope.ServiceProvider.GetRequiredService<IEmailConfigurationRepository>();
+                        var config = await emailConfigRepository.GetByIdAsync(ConfigId);
+
+                        if (config == null)
+                        {
+                            _logger.LogError($"Email configuration with ID {ConfigId} not found. Service will retry in 1 hour.");
+                            await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                            continue;
+                        }
+
+                        if (!config.IsActive)
+                        {
+                            _logger.LogInformation($"Email configuration ID {ConfigId} is inactive. Service will check again in 1 hour.");
+                            await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                            continue;
+                        }
+
+                        scheduledTime = config.ScheduledTime;
+                    }
+
                     var now = DateTime.Now;
-                    var scheduledDateTime = now.Date + _scheduledTime;
+                    var scheduledDateTime = now.Date + scheduledTime;
 
                     // If scheduled time has passed today, schedule for tomorrow
                     if (now > scheduledDateTime)
@@ -46,7 +71,7 @@ namespace IlpRepoBackend.Application.BackgroundServices
 
                     var delay = scheduledDateTime - now;
 
-                    _logger.LogInformation($"Next reminder check scheduled at {scheduledDateTime}. Waiting {delay.TotalHours:F2} hours.");
+                    _logger.LogInformation($"Next reminder check scheduled at {scheduledDateTime} ({scheduledTime}). Waiting {delay.TotalHours:F2} hours.");
 
                     await Task.Delay(delay, stoppingToken);
 
@@ -54,6 +79,11 @@ namespace IlpRepoBackend.Application.BackgroundServices
                     {
                         await CheckAndSendRemindersAsync();
                     }
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogInformation("Document Reminder Background Service is being cancelled.");
+                    break;
                 }
                 catch (Exception ex)
                 {
@@ -72,18 +102,17 @@ namespace IlpRepoBackend.Application.BackgroundServices
 
             var emailConfigRepository = scope.ServiceProvider.GetRequiredService<IEmailConfigurationRepository>();
             var documentRequestRepository = scope.ServiceProvider.GetRequiredService<IDocumentRequestRepository>();
-            var projectRepository = scope.ServiceProvider.GetRequiredService<IProjectRepository>();
             var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
             var emailLogRepository = scope.ServiceProvider.GetRequiredService<IEmailLogRepository>();
 
             try
             {
-                // Get email configuration for document reminders
-                var config = await emailConfigRepository.GetByServiceNameAsync("DocumentRequestReminder");
+                // Get email configuration by ID (fixed ID: 1)
+                var config = await emailConfigRepository.GetByIdAsync(ConfigId);
 
                 if (config == null || !config.IsActive)
                 {
-                    _logger.LogWarning("DocumentRequestReminder configuration not found or inactive.");
+                    _logger.LogWarning($"{ServiceName} configuration (ID: {ConfigId}) not found or inactive.");
                     return;
                 }
 
@@ -152,7 +181,7 @@ namespace IlpRepoBackend.Application.BackgroundServices
                             };
 
                             var emailSent = await emailService.SendEmailWithTemplateAsync(
-                                "DocumentRequestReminder",
+                                ServiceName,
                                 member.Email,
                                 member.Username ?? "Team Member",
                                 templateData,

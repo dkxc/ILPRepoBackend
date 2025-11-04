@@ -1,0 +1,47 @@
+[
+  {
+    "label": "Run (http)",
+    "command": "dotnet",
+    "args": [
+      "run",
+      "--project",
+      "IlpRepoBackend.Api/IlpRepoBackend.Api.csproj",
+      "--launch-profile",
+      "http"
+    ],
+    "env": {
+      "ASPNETCORE_ENVIRONMENT": "Development"
+    },
+    "use_new_terminal": true
+  },
+  {
+    "label": "Run (https)",
+    "command": "dotnet",
+    "args": [
+      "run",
+      "--project",
+      "IlpRepoBackend.Api/IlpRepoBackend.Api.csproj",
+      "--launch-profile",
+      "https"
+    ],
+    "env": {
+      "ASPNETCORE_ENVIRONMENT": "Development"
+    },
+    "use_new_terminal": true
+  },
+  {
+    "label": "Run (IIS Express)",
+    "command": "dotnet",
+    "args": [
+      "run",
+      "--project",
+      "IlpRepoBackend.Api/IlpRepoBackend.Api.csproj",
+      "--launch-profile",
+      "IIS Express"
+    ],
+    "env": {
+      "ASPNETCORE_ENVIRONMENT": "Development"
+    },
+    "use_new_terminal": true
+  }
+]

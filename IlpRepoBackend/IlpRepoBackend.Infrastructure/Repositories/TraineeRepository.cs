@@ -50,11 +50,26 @@ namespace IlpRepoBackend.Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.UserId == userId);
         }
 
+        // this was added later in dev
+        // due to flaw in Project & ProjectTeams design
+        public async Task<Trainee?> GetByUserIdWithDetailsAsync(int userId)
+        {
+            return await _context.Trainees
+                .Include(t => t.User)
+                .Include(t => t.Batch)
+                    .ThenInclude(b => b.BatchType)
+                .Include(t => t.ProjectTeams)
+                    .ThenInclude(pt => pt.Project)
+                .Include(t => t.Results)
+                    .ThenInclude(r => r.Assessment)
+                .FirstOrDefaultAsync(t => t.UserId == userId);
+        }
+
         public async Task<bool> AadhaarIdExistsAsync(string aadhaarId)
         {
             if (string.IsNullOrWhiteSpace(aadhaarId))
                 return false;
-                
+
             return await _context.Trainees
                 .AnyAsync(t => t.AadhaarId == aadhaarId);
         }
@@ -82,6 +97,14 @@ namespace IlpRepoBackend.Infrastructure.Repositories
                 .Include(t => t.User)
                 .Include(t => t.Batch)
                 .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public async Task<List<Trainee>> GetTraineesWithResultsByBatchIdAsync(int batchId)
+        {
+            return await _context.Trainees
+                .Include(t => t.Results)
+                .Where(t => t.BatchId == batchId)
+                .ToListAsync();
         }
     }
 }
