@@ -10,5 +10,7 @@ namespace IlpRepoBackend.Domain.Persistence
     public interface ITrainingScheduleRepository : IGenericRepository<TrainingSchedule>
     {
         Task<IEnumerable<TrainingSchedule>> GetByBatchIdAsync(int batchId);
+        Task AddRangeAsync(IEnumerable<TrainingSchedule> schedules);
+        Task<IEnumerable<TrainingSchedule>> GetByBatchTypeAndDateRangeAsync(int? batchTypeId, DateTime startDate, DateTime endDate);
     }
 }

@@ -17,13 +17,18 @@ namespace IlpRepoBackend.Application.Handler.Batchs
     {
         private readonly IMapper _mapper;
         private readonly IBatchRepository _batchRepository;
-        
-        public CreateBatchHandler(IMapper mapper, IBatchRepository batchRepository)
+        private readonly ITrainingScheduleRepository _trainingScheduleRepository;
+
+        public CreateBatchHandler(
+            IMapper mapper,
+            IBatchRepository batchRepository,
+            ITrainingScheduleRepository trainingScheduleRepository)
         {
             _mapper = mapper;
             _batchRepository = batchRepository;
+            _trainingScheduleRepository = trainingScheduleRepository;
         }
-        
+
         public async Task<BatchDto> Handle(CreateBatchCommand request, CancellationToken cancellationToken)
         {
             var status = CalculateStatus(request.StartDate, request.EndDate);
@@ -53,8 +58,30 @@ namespace IlpRepoBackend.Application.Handler.Batchs
                 }).ToList();
             }
 
-            // Add the batch with phases
+            // Save the batch first
             var created = await _batchRepository.AddAsync(batch);
+
+            // ✅ Generate training schedules automatically
+            if (created.StartDate.HasValue && created.EndDate.HasValue)
+            {
+                var schedules = new List<TrainingSchedule>();
+                var startDate = created.StartDate.Value.Date;
+                var endDate = created.EndDate.Value.Date;
+
+                for (var date = startDate; date <= endDate; date = date.AddDays(1))
+                {
+                    schedules.Add(new TrainingSchedule
+                    {
+                        BatchId = created.Id,
+                        TrainingDate = date,
+                        Hours = 8,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    });
+                }
+
+                await _trainingScheduleRepository.AddRangeAsync(schedules);
+            }
 
             // Re-fetch with related data (BatchType and Phases) to ensure DTO has all data populated
             var createdWithIncludes = await _batchRepository.GetByIdAsync(created.Id);

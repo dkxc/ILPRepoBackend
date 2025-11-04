@@ -14,7 +14,9 @@ namespace IlpRepoBackend.Domain.Entities
         public int Hours { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-
-        public Batch? Batch { get; set; }
+        // ✅ Navigation property
+        public virtual Batch? Batch { get; set; }
     }
 }
+
+
