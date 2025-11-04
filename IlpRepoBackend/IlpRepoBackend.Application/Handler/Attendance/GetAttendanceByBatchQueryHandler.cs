@@ -72,7 +72,6 @@ namespace IlpRepoBackend.Application.Handler.Attendance
                             Afternoon = AttendanceStatus.P
                         };
                     }
-                    // --- END SINGLE LOOKUP ---
                 }
                 response.Add(traineeAttendance);
             }
