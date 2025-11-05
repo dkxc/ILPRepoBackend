@@ -41,5 +41,23 @@ namespace IlpRepoBackend.Infrastructure.Repositories
             await _context.TrainingSchedules.AddRangeAsync(schedules);
             await _context.SaveChangesAsync();
         }
+        public async Task<TrainingSchedule?> GetByBatchAndDateAsync(int batchId, DateTime date)
+        {
+            return await _context.TrainingSchedules
+                .FirstOrDefaultAsync(t =>
+                    t.BatchId == batchId &&
+                    t.TrainingDate.Date == date.Date);
+        }
+
+        public async Task UpdateOrCreateAsync(TrainingSchedule schedule)
+        {
+            if (schedule.Id == 0)
+                _context.TrainingSchedules.Add(schedule);
+            else
+                _context.TrainingSchedules.Update(schedule);
+
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

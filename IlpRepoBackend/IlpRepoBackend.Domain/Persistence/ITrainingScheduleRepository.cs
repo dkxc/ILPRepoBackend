@@ -12,5 +12,8 @@ namespace IlpRepoBackend.Domain.Persistence
         Task<IEnumerable<TrainingSchedule>> GetByBatchIdAsync(int batchId);
         Task AddRangeAsync(IEnumerable<TrainingSchedule> schedules);
         Task<IEnumerable<TrainingSchedule>> GetByBatchTypeAndDateRangeAsync(int? batchTypeId, DateTime startDate, DateTime endDate);
+        Task<TrainingSchedule?> GetByBatchAndDateAsync(int batchId, DateTime date);
+        Task UpdateOrCreateAsync(TrainingSchedule schedule);
+
     }
 }
