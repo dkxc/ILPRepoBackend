@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IlpRepoBackend.Infrastructu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IlpRepoBackend.Api", "IlpRepoBackend.Api\IlpRepoBackend.Api.csproj", "{9D695F44-9852-4F13-BF2C-5C901A9A2F82}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IlpRepoBackend.Test", "IlpRepoBackend.Test\IlpRepoBackend.Test.csproj", "{9D8C34EB-44FB-4D65-890C-8F318AF38D54}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{9D695F44-9852-4F13-BF2C-5C901A9A2F82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D695F44-9852-4F13-BF2C-5C901A9A2F82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D695F44-9852-4F13-BF2C-5C901A9A2F82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D8C34EB-44FB-4D65-890C-8F318AF38D54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D8C34EB-44FB-4D65-890C-8F318AF38D54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D8C34EB-44FB-4D65-890C-8F318AF38D54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D8C34EB-44FB-4D65-890C-8F318AF38D54}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
