@@ -296,8 +296,9 @@ namespace IlpRepoBackend.Test.Handlers.Batches
             _batchRepositoryMock.Setup(x => x.UpdateAsync(It.IsAny<Batch>()))
                 .Callback<Batch>(b => capturedBatch = b)
                 .ReturnsAsync((Batch b) => b);
-            _batchRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync((int id) => capturedBatch);
+            _batchRepositoryMock.SetupSequence(x => x.GetByIdAsync(1))
+                .ReturnsAsync(existingBatch)
+                .ReturnsAsync(() => capturedBatch);
             _mapperMock.Setup(x => x.Map<BatchDto>(It.IsAny<Batch>()))
                 .Returns(new BatchDto());
 
@@ -345,8 +346,9 @@ namespace IlpRepoBackend.Test.Handlers.Batches
             _batchRepositoryMock.Setup(x => x.UpdateAsync(It.IsAny<Batch>()))
                 .Callback<Batch>(b => capturedBatch = b)
                 .ReturnsAsync((Batch b) => b);
-            _batchRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync((int id) => capturedBatch);
+            _batchRepositoryMock.SetupSequence(x => x.GetByIdAsync(1))
+                .ReturnsAsync(existingBatch)
+                .ReturnsAsync(() => capturedBatch);
             _mapperMock.Setup(x => x.Map<BatchDto>(It.IsAny<Batch>()))
                 .Returns(new BatchDto());
 
@@ -386,8 +388,9 @@ namespace IlpRepoBackend.Test.Handlers.Batches
             _batchRepositoryMock.Setup(x => x.UpdateAsync(It.IsAny<Batch>()))
                 .Callback<Batch>(b => capturedBatch = b)
                 .ReturnsAsync((Batch b) => b);
-            _batchRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync((int id) => capturedBatch);
+            _batchRepositoryMock.SetupSequence(x => x.GetByIdAsync(1))
+                .ReturnsAsync(existingBatch)
+                .ReturnsAsync(() => capturedBatch);
             _mapperMock.Setup(x => x.Map<BatchDto>(It.IsAny<Batch>()))
                 .Returns(new BatchDto());
 

@@ -63,7 +63,7 @@ namespace IlpRepoBackend.Test.Handlers.Batches
                 .ReturnsAsync(createdBatch);
             _batchRepositoryMock.Setup(x => x.GetByIdAsync(createdBatch.Id))
                 .ReturnsAsync(createdBatch);
-            _trainingScheduleRepositoryMock.Setup(x => x.AddRangeAsync(It.IsAny<List<TrainingSchedule>>()))
+            _trainingScheduleRepositoryMock.Setup(x => x.AddRangeAsync(It.IsAny<IEnumerable<TrainingSchedule>>()))
                 .Returns(Task.CompletedTask);
             _mapperMock.Setup(x => x.Map<BatchDto>(It.IsAny<Batch>()))
                 .Returns(batchDto);
@@ -199,12 +199,15 @@ namespace IlpRepoBackend.Test.Handlers.Batches
             };
 
             Batch? capturedBatch = null;
+            var createdBatch = new Batch { Id = 1, BatchName = command.BatchName, StartDate = command.StartDate, EndDate = command.EndDate };
 
             _batchRepositoryMock.Setup(x => x.AddAsync(It.IsAny<Batch>()))
                 .Callback<Batch>(b => capturedBatch = b)
                 .ReturnsAsync((Batch b) => { b.Id = 1; return b; });
-            _batchRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync((Batch b) => capturedBatch);
+            _batchRepositoryMock.Setup(x => x.GetByIdAsync(1))
+                .ReturnsAsync(createdBatch);
+            _trainingScheduleRepositoryMock.Setup(x => x.AddRangeAsync(It.IsAny<IEnumerable<TrainingSchedule>>()))
+                .Returns(Task.CompletedTask);
             _mapperMock.Setup(x => x.Map<BatchDto>(It.IsAny<Batch>()))
                 .Returns(new BatchDto());
 
@@ -233,14 +236,14 @@ namespace IlpRepoBackend.Test.Handlers.Batches
                 EndDate = endDate
             };
 
-            List<TrainingSchedule>? capturedSchedules = null;
+            IEnumerable<TrainingSchedule>? capturedSchedules = null;
 
             _batchRepositoryMock.Setup(x => x.AddAsync(It.IsAny<Batch>()))
-                .ReturnsAsync((Batch b) => { b.Id = 1; return b; });
-            _batchRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync((Batch b) => { b.Id = 1; b.StartDate = startDate; b.EndDate = endDate; return b; });
+            _batchRepositoryMock.Setup(x => x.GetByIdAsync(1))
                 .ReturnsAsync(new Batch { Id = 1, StartDate = startDate, EndDate = endDate });
-            _trainingScheduleRepositoryMock.Setup(x => x.AddRangeAsync(It.IsAny<List<TrainingSchedule>>()))
-                .Callback<List<TrainingSchedule>>(s => capturedSchedules = s)
+            _trainingScheduleRepositoryMock.Setup(x => x.AddRangeAsync(It.IsAny<IEnumerable<TrainingSchedule>>()))
+                .Callback<IEnumerable<TrainingSchedule>>(s => capturedSchedules = s)
                 .Returns(Task.CompletedTask);
             _mapperMock.Setup(x => x.Map<BatchDto>(It.IsAny<Batch>()))
                 .Returns(new BatchDto());
@@ -250,7 +253,7 @@ namespace IlpRepoBackend.Test.Handlers.Batches
 
             // Assert
             capturedSchedules.ShouldNotBeNull();
-            capturedSchedules.Count.ShouldBe(5); // 5 days from Jan 1 to Jan 5
+            capturedSchedules.Count().ShouldBe(5); // 5 days from Jan 1 to Jan 5
             capturedSchedules.All(s => s.Hours == 8).ShouldBeTrue();
             capturedSchedules.All(s => s.BatchId == 1).ShouldBeTrue();
         }
