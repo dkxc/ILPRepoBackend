@@ -30,7 +30,7 @@ namespace IlpRepoBackend.Application.Handler.Attendance
                 return ApiResponse<string>.Fail("No trainees found in the specified batch.");
 
             var traineeEmailMap = traineesInBatch.ToDictionary(
-                t => t.Email,
+                t => t.User.Username,
                 t => t.Id,
                 StringComparer.OrdinalIgnoreCase // Use case-insensitive comparison for emails
             );
@@ -40,7 +40,7 @@ namespace IlpRepoBackend.Application.Handler.Attendance
 
             foreach (var uploadItem in request.UploadData)
             {
-                if (traineeEmailMap.TryGetValue(uploadItem.TraineeEmail, out var traineeId))
+                if (traineeEmailMap.TryGetValue(uploadItem.TraineeName, out var traineeId))
                 {
                     recordsToUpsert.Add(new Domain.Entities.Attendance
                     {
@@ -52,7 +52,7 @@ namespace IlpRepoBackend.Application.Handler.Attendance
                 }
                 else
                 {
-                    invalidTrainees.Add(uploadItem.TraineeEmail);
+                    invalidTrainees.Add(uploadItem.TraineeName);
                 }
             }
 

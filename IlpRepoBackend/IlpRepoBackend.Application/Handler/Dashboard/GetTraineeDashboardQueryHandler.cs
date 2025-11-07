@@ -44,7 +44,11 @@ namespace IlpRepoBackend.Application.Handler.Dashboard
             ProjectDto? projectDto = null;
             if (projectTeam != null)
             {
+                // why isn't it calculated correctly in db?
                 var project = await _projectRepository.GetProjectWithDetailsAsync(projectTeam.ProjectId);
+                var totalRequests = project.DocumentRequests.Count;
+                var submittedRequestsCount = project.DocumentRequests.Count(req => req.DocumentSubmissions != null && req.DocumentSubmissions.Any());
+                var progressPercentage = (int)Math.Round((double)submittedRequestsCount / totalRequests * 100);
                 if (project != null)
                 {
                     projectDto = new ProjectDto
@@ -52,7 +56,7 @@ namespace IlpRepoBackend.Application.Handler.Dashboard
                         Id = project.Id,
                         Title = project.ProjectName,
                         Status = project.Status,
-                        Progress = project.Progress,
+                        Progress = progressPercentage,
                         Technologies = !string.IsNullOrEmpty(project.Technology) ? project.Technology.Split(',').Select(t => t.Trim()).ToList() : new(),
                         Team = new TeamDto
                         {
@@ -65,8 +69,39 @@ namespace IlpRepoBackend.Application.Handler.Dashboard
 
             // 2. Get Batch Data
             var batch = trainee.Batch;
-            var batchStatus = (DateTime.UtcNow < batch.StartDate) ? "Not Started" : (DateTime.UtcNow > batch.EndDate) ? "Completed" : "Ongoing";
-            var batchDay = (batch.StartDate.HasValue) ? (DateTime.UtcNow - batch.StartDate.Value).Days : 0;
+            var today = DateTime.UtcNow.Date;
+            var startDate = batch.StartDate?.Date ?? today;
+            var endDate = batch.EndDate?.Date ?? today;
+
+            var batchStatus = "Ongoing"; // Default assumption
+            if (today < startDate)
+            {
+                batchStatus = "Not Started";
+            }
+            else if (today > endDate)
+            {
+                batchStatus = "Completed";
+            }
+
+            var batchDay = 0;
+            if (batch.StartDate.HasValue)
+            {
+                switch (batchStatus)
+                {
+                    case "Ongoing":
+                        // For ongoing batches, calculate the current day number (Day 1, Day 2, etc.)
+                        batchDay = (today - startDate).Days + 1;
+                        break;
+                    case "Completed":
+                        // For completed batches, calculate the total duration of the batch
+                        if (batch.EndDate.HasValue)
+                        {
+                            batchDay = (endDate - startDate).Days + 1;
+                        }
+                        break;
+                        // For "Not Started", batchDay remains 0 by default
+                }
+            }
 
             var batchDto = new BatchDto
             {

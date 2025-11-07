@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5174", "http://localhost:5173", "http://localhost:5175", "http://localhost:5176")
+        policy.WithOrigins("http://ilprepo.vercel.app", "https://ilprepo.vercel.app", "http://www.ilprepo.vercel.app", "https://ilprepo.vercel.app")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); // optional, only if you're using cookies or auth headers
@@ -115,14 +115,14 @@ var app = builder.Build();
 //AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
+// if (app.Environment.IsDevelopment())
+// {
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "ILP Repo Backend API v1");
-    });
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "ILP Repo Backend API v1");
+});
+// }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 

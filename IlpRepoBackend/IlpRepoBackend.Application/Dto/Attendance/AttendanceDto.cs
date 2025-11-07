@@ -35,7 +35,7 @@ namespace IlpRepoBackend.Application.Dto.Attendance
     // For POST (upload) request
     public class UploadAttendanceDto
     {
-        public string TraineeEmail { get; set; } = string.Empty;
+        public string TraineeName { get; set; } = string.Empty;
         public string Date { get; set; } = string.Empty;
         public AttendanceStatus Forenoon { get; set; }
         public AttendanceStatus Afternoon { get; set; }

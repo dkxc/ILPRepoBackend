@@ -52,8 +52,8 @@ namespace IlpRepoBackend.Application.Handler.Attendance
                         {
                             TraineeId = traineeId,
                             Date = date,
-                            ForenoonStatus = updateData.Status.Forenoon ?? Domain.Enum.AttendanceStatus.NA,
-                            AfternoonStatus = updateData.Status.Afternoon ?? Domain.Enum.AttendanceStatus.NA
+                            ForenoonStatus = updateData.Status.Forenoon ?? Domain.Enum.AttendanceStatus.P,
+                            AfternoonStatus = updateData.Status.Afternoon ?? Domain.Enum.AttendanceStatus.P
                         });
                     }
                 }
