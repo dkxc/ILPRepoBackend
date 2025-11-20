@@ -18,10 +18,14 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://ilprepo.vercel.app", "https://ilprepo.vercel.app", "http://www.ilprepo.vercel.app", "https://ilprepo.vercel.app")
+        policy.WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://localhost:5175",
+                "http://localhost:5176")
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials(); // optional, only if you're using cookies or auth headers
+              .AllowCredentials();
     });
 });
 

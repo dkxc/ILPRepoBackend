@@ -2,13 +2,14 @@
 using IlpRepoBackend.Application.Command.SignInDto;
 using IlpRepoBackend.Application.Query.Auth;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace IlpRepoBackend.API.Controllers
 {
-    [ApiController]
+   
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
@@ -124,6 +125,7 @@ namespace IlpRepoBackend.API.Controllers
         }
 
         [HttpPost("set-password")]
+        [Authorize]
         public async Task<IActionResult> SetPassword([FromBody] SetPasswordDto request, [FromHeader] string authorization)
         {
             if (!ModelState.IsValid)
